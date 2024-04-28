@@ -1,0 +1,38 @@
+{
+  "cmake.configureOnOpen": false,
+  /* the following has apparently been depricated
+  "cmake.statusbar.advanced": {
+    "debug" : {
+      "visibility": "hidden"
+              },
+    "launch" : {
+      "visibility": "hidden"
+               },
+    "build" : {
+      "visibility": "hidden"
+               },
+    "buildTarget" : {
+      "visibility": "hidden"
+               }
+  },
+  */
+  /* so replace it with this to correctly disable the buttons. */
+  "cmake.options.advanced": {
+    "build": {
+        "statusBarVisibility": "hidden",
+        "inheritDefault": "hidden"
+    },
+    "launch": {
+        "statusBarVisibility": "hidden",
+        "inheritDefault": "hidden"
+    },
+    "debug": {
+        "statusBarVisibility": "hidden",
+        "inheritDefault": "hidden"
+    },
+    "buildTarget": {
+        "statusBarVisibility": "hidden",
+        "inheritDefault": "hidden"
+    }
+  }
+}
