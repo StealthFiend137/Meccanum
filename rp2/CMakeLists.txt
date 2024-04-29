@@ -46,6 +46,7 @@ target_include_directories(rp2 PRIVATE
 # Add any user requested libraries
 target_link_libraries(rp2 
         hardware_i2c
+        pico_i2c_slave
         )
 
 pico_add_extra_outputs(rp2)
