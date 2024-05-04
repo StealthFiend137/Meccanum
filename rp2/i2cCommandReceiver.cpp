@@ -11,6 +11,7 @@ private:
     struct MemoryRegister
     {
         uint8_t value;
+        bool externallyModifiable;
         bool modified;
     };
 
@@ -49,17 +50,12 @@ private:
 
     static void Register_Change(uint8_t address, uint8_t value)
     {
-        Register_Modify(address, value);
-        Register_NotifyChange(address, value);
-    }
+        if(!memoryRegisters[address].externallyModifiable) 
+        {
+            return;
+        }
 
-    static void Register_Modify(uint8_t address, uint8_t value)
-    {
         memoryRegisters[address].value = value;
-    }
-
-    static void Register_NotifyChange(uint8_t address, uint8_t value)
-    {
         memoryRegisters[address].modified = true;
         registerChanged = true;
     }
@@ -69,13 +65,39 @@ private:
         return memoryRegisters[address].value;
     }
 
+    static void Register_Set(uint8_t address, uint8_t value, bool externallyModifiable)
+    {
+        memoryRegisters[address].value = value;
+        memoryRegisters[address].externallyModifiable = externallyModifiable;
+        memoryRegisters[address].modified = false;
+    }
+
     void registers_init()
     {
-        // Put some pretend values into the telemetry registers.
-        // battery cell registers are - 0-255
-        Register_Modify(CELL0, 255);
-        Register_Modify(CELL1, 128);
-        Register_Modify(CELL2, 0);
+        // Telemetry Registers
+        Register_Set(CELL0, 0, false);
+        Register_Set(CELL1, 0, false);
+        Register_Set(CELL2, 0, false);
+
+        // Movement Registers
+        Register_Set(XDIR0, 0, true);
+        Register_Set(XDIR1, 0, true);
+        Register_Set(YDIR0, 0, true);
+        Register_Set(YDIR1, 0, true);
+        Register_Set(WDIR0, 0, true);
+        Register_Set(WDIR1, 0, true);
+        Register_Set(MOVET, 0, true);
+
+        // Sound Registers
+        Register_Set(SOUND, 0, true);
+        Register_Set(FREQ0, 0, true);
+        Register_Set(DUTY0, 0, true);
+        Register_Set(FREQ1, 0, true);
+        Register_Set(DUTY1, 0, true);
+
+        // Lighting Registers
+        Register_Set(LIGH0, 0, true);
+        Register_Set(LIGH1, 0, true);
     }
 
     static void i2c_slave_isr(i2c_inst_t *i2c, i2c_slave_event_t event)

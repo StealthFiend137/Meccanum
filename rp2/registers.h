@@ -17,7 +17,7 @@
 // Sound Registers (5)
 #define SOUND 0x0A
 #define FREQ0 0x0B
-#define DUTY0 0x0D
+#define DUTY0 0x0C
 #define FREQ1 0x0D
 #define DUTY1 0x0E
 
