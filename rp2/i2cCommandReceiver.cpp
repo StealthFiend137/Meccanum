@@ -3,10 +3,12 @@
 #include "registers.h"
 #include <math.h>
 
+#define REGISTER_COUNT 19
+
 class I2cCommandReceiver
 {
 
-private:
+public:
 
     struct MemoryRegister
     {
@@ -15,12 +17,15 @@ private:
         bool modified;
     };
 
-    inline static MemoryRegister memoryRegisters[19];
+private:
+
+    inline static MemoryRegister memoryRegisters[REGISTER_COUNT];
     inline static bool registerChanged = false;
     inline static uint8_t address = 0;
     inline static bool addressWritten = false;
 
 public:
+
 
     I2cCommandReceiver(i2c_inst_t* i2c)
     {
@@ -44,14 +49,39 @@ public:
         i2c_slave_init(i2c_instance, address, i2c_slave_isr);
     }
 
-    bool GetRegisterChanged()
+    bool GetAnyRegisterChanged()
     {
-        return registerChanged;
+        //return registerChanged;
+        return true;
     }
 
-    void ClearRegisterChanged()
+    void ClearAllChangedRegisters()
     {
         registerChanged = false;
+    }
+
+    MemoryRegister fakeMemreg = MemoryRegister();
+
+    int GetChangedArrays(I2cCommandReceiver::MemoryRegister** changedRegisters)
+    {
+        int changedRegistersCount = 0;
+
+        for(MemoryRegister memRegister : memoryRegisters)
+        {
+            if(memRegister.modified || memRegister.externallyModifiable)
+            {
+                MemoryRegister* memRegisterPtr = &memRegister;
+                
+                //delete changedRegisters[changedRegistersCount];
+                changedRegisters[changedRegistersCount] = memRegisterPtr;
+                changedRegistersCount++;
+
+                // changedRegisters[changedRegistersCount] = &memRegister;
+                // changedRegistersCount++;
+            }
+        }
+
+        return changedRegistersCount;
     }
 
 private:
@@ -85,20 +115,20 @@ private:
     void registers_init()
     {
         // Telemetry Registers
-        Register_Set(CELL0, 0, false);
-        Register_Set(CELL1, 0, false);
-        Register_Set(CELL2, 0, false);
+        Register_Set(CELL0, 1, false);
+        Register_Set(CELL1, 2, false);
+        Register_Set(CELL2, 3, false);
 
         // Movement Registers
-        Register_Set(XDIR0, 0, true);
-        Register_Set(XDIR1, 0, true);
-        Register_Set(XDIRT, 0, true);
-        Register_Set(YDIR0, 0, true);
-        Register_Set(YDIR1, 0, true);
-        Register_Set(YDIRT, 0, true);
-        Register_Set(WDIR0, 0, true);
+        Register_Set(XDIR0, 4, true);
+        Register_Set(XDIR1, 5, true);
+        Register_Set(XDIRT, 6, false);
+        Register_Set(YDIR0, 7, true);
+        Register_Set(YDIR1, 8, true);
+        Register_Set(YDIRT, 9, false);
+        Register_Set(WDIR0, 10, true);
         Register_Set(WDIR1, 0, true);
-        Register_Set(WDIRT, 0, true);
+        Register_Set(WDIRT, 0, false);
 
         // Sound Registers
         Register_Set(SOUND, 0, true);

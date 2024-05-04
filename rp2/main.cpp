@@ -24,6 +24,7 @@ int main()
     commandReceiver.setup_command_receiver(I2C_SLAVE_SDA_PIN, I2C_SLAVE_SCL_PIN, I2C_SLAVE_BAUDRATE, I2C_SLAVE_ADDRESS);
 
     int start = to_ms_since_boot(get_absolute_time());
+    I2cCommandReceiver::MemoryRegister** changedRegisters;
 
     while(1)
     {
@@ -31,10 +32,26 @@ int main()
         if(elapsed_time > 1000)
         {
             start = to_ms_since_boot(get_absolute_time());
-            if(commandReceiver.GetRegisterChanged())
+            if(commandReceiver.GetAnyRegisterChanged())
             {
-                puts("register changed");
-                commandReceiver.ClearRegisterChanged();
+                
+                int changedArrayCount = commandReceiver.GetChangedArrays(changedRegisters);
+                printf("Number changed: %d\n", changedArrayCount);
+
+                // for(int i = 0; i<changedArrayCount; i++)
+                // {
+                //     I2cCommandReceiver::MemoryRegister* memreg = *(changedRegisters(i * sizeof(I2cCommandReceiver::MemoryRegister)));
+                //     printf("c%\n", memreg->value);
+                // }
+
+                for(int i = 0; i < changedArrayCount; i++)
+                {
+                    I2cCommandReceiver::MemoryRegister* memreg = changedRegisters[i];
+                    printf("%u\n", memreg->value);
+                }
+                
+
+                commandReceiver.ClearAllChangedRegisters();
             }
             else
             {
@@ -42,7 +59,6 @@ int main()
             }
         }
         
-
         // do other things.
     }
 }
