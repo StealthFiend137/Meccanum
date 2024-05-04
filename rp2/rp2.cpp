@@ -3,34 +3,13 @@
 #include <pico/stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "i2c_handler.cpp"
+#include "registers.h"
 
 #define I2C_SLAVE_PORT i2c0
 #define RING_BUFFER_COUNT 8
 
-// Telemetry Registers (3)
-#define CELL0 0x00
-#define CELL1 0x01
-#define CELL2 0x02
 
-// Movement Registers (7)
-#define XDIR0 0x03
-#define XDIR1 0X04
-#define YDIR0 0x05
-#define YDIR1 0X06
-#define WDIR0 0x07
-#define WDIR1 0x08
-#define MOVET 0x09
-
-// Sound Registers (5)
-#define SOUND 0x0A
-#define FREQ0 0x0B
-#define DUTY0 0x0D
-#define FREQ1 0x0D
-#define DUTY1 0x0E
-
-// Lighting Registers (2)
-#define LIGH0 0x0F
-#define LIGH1 0x10
 
 // I2C
 static const uint I2C_SLAVE_SDA_PIN = 16; // Green
@@ -95,7 +74,7 @@ static void i2c_slave_handler(i2c_inst_t *i2c, i2c_slave_event_t event) {
     }
 }
 
-static void setup_slave() {
+static void setup_command_receiver() {
     gpio_init(I2C_SLAVE_SDA_PIN);
     gpio_pull_up(I2C_SLAVE_SDA_PIN);
     gpio_set_function(I2C_SLAVE_SDA_PIN, GPIO_FUNC_I2C);
@@ -117,13 +96,13 @@ void registers_init()
     registers[CELL2][1] = 0;
 }
 
+I2cCommandReceiver i2cHandler(i2c0);
+
 int main()
 {
     stdio_init_all();
-
     registers_init();
-
-    setup_slave();
+    setup_command_receiver();
 
     // Context* current = &ring_buffer[next_process_position];
 
