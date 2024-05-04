@@ -23,8 +23,24 @@ int main()
     
     commandReceiver.setup_command_receiver(I2C_SLAVE_SDA_PIN, I2C_SLAVE_SCL_PIN, I2C_SLAVE_BAUDRATE, I2C_SLAVE_ADDRESS);
 
+    int start = to_ms_since_boot(get_absolute_time());
+
     while(1)
     {
+        int elapsed_time = to_ms_since_boot(get_absolute_time()) - start; 
+        if(elapsed_time > 1000)
+        {
+            puts("Output line triggered");
+            if(commandReceiver.GetRegisterChanged())
+            {
+                puts("register changed");
+                commandReceiver.ClearRegisterChanged();
+            }
 
+            start = to_ms_since_boot(get_absolute_time());
+        }
+        
+
+        // do other things.
     }
 }

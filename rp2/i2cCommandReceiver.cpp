@@ -44,6 +44,16 @@ public:
         i2c_slave_init(i2c_instance, address, i2c_slave_isr);
     }
 
+    bool GetRegisterChanged()
+    {
+        return registerChanged;
+    }
+
+    void ClearRegisterChanged()
+    {
+        registerChanged = false;
+    }
+
 private:
 
     i2c_inst_t* i2c_instance;
