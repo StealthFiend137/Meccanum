@@ -15,7 +15,7 @@ private:
         bool modified;
     };
 
-    inline static MemoryRegister memoryRegisters[17];
+    inline static MemoryRegister memoryRegisters[19];
     inline static bool registerChanged = false;
     inline static uint8_t address = 0;
     inline static bool addressWritten = false;
@@ -92,11 +92,13 @@ private:
         // Movement Registers
         Register_Set(XDIR0, 0, true);
         Register_Set(XDIR1, 0, true);
+        Register_Set(XDIRT, 0, true);
         Register_Set(YDIR0, 0, true);
         Register_Set(YDIR1, 0, true);
+        Register_Set(YDIRT, 0, true);
         Register_Set(WDIR0, 0, true);
         Register_Set(WDIR1, 0, true);
-        Register_Set(MOVET, 0, true);
+        Register_Set(WDIRT, 0, true);
 
         // Sound Registers
         Register_Set(SOUND, 0, true);

@@ -30,14 +30,16 @@ int main()
         int elapsed_time = to_ms_since_boot(get_absolute_time()) - start; 
         if(elapsed_time > 1000)
         {
-            puts("Output line triggered");
+            start = to_ms_since_boot(get_absolute_time());
             if(commandReceiver.GetRegisterChanged())
             {
                 puts("register changed");
                 commandReceiver.ClearRegisterChanged();
             }
-
-            start = to_ms_since_boot(get_absolute_time());
+            else
+            {
+                puts("no register changes");
+            }
         }
         
 
