@@ -7,15 +7,14 @@
 #include "registers.h"
 
 #define I2C_SLAVE_PORT i2c0
+#define I2C_MASTER_PORT i2c1
 #define RING_BUFFER_COUNT 8
-
-
 
 // I2C
 static const uint I2C_SLAVE_SDA_PIN = 16; // Green
 static const uint I2C_SLAVE_SCL_PIN = 17; // Yellow
 static const uint I2C_SLAVE_ADDRESS = 0x17;
-static const uint I2C_BAUDRATE = 100000; // 100 kHz
+static const uint I2C_SLAVE_BAUDRATE = 100000; // 100 kHz
 
 uint8_t registers[17][2];
 
@@ -33,7 +32,7 @@ Context ring_buffer[RING_BUFFER_COUNT];
 uint8_t ring_buffer_position = 0;
 uint8_t next_process_position = 0;
 
-static void i2c_slave_handler(i2c_inst_t *i2c, i2c_slave_event_t event) {
+void i2c_slave_handler(i2c_inst_t *i2c, i2c_slave_event_t event) {
     switch (event) {
 
         case I2C_SLAVE_RECEIVE: // master has initiated a connection
@@ -74,18 +73,7 @@ static void i2c_slave_handler(i2c_inst_t *i2c, i2c_slave_event_t event) {
     }
 }
 
-static void setup_command_receiver() {
-    gpio_init(I2C_SLAVE_SDA_PIN);
-    gpio_pull_up(I2C_SLAVE_SDA_PIN);
-    gpio_set_function(I2C_SLAVE_SDA_PIN, GPIO_FUNC_I2C);
 
-    gpio_init(I2C_SLAVE_SCL_PIN);
-    gpio_pull_up(I2C_SLAVE_SCL_PIN);
-    gpio_set_function(I2C_SLAVE_SCL_PIN, GPIO_FUNC_I2C);
-
-    i2c_init(i2c0, I2C_BAUDRATE);
-    i2c_slave_init(i2c0, I2C_SLAVE_ADDRESS, &i2c_slave_handler);
-}
 
 void registers_init()
 {
@@ -102,7 +90,10 @@ int main()
 {
     stdio_init_all();
     registers_init();
-    setup_command_receiver();
+    // setup_command_receiver();
+    
+    auto commandReceiver = I2cCommandReceiver(I2C_SLAVE_PORT);
+    commandReceiver.setup_command_receiver(I2C_SLAVE_SDA_PIN, I2C_SLAVE_SCL_PIN, I2C_SLAVE_BAUDRATE, I2C_SLAVE_ADDRESS, &i2c_slave_handler);
 
     // Context* current = &ring_buffer[next_process_position];
 
