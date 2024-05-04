@@ -3,7 +3,7 @@
 #include <pico/stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "i2c_handler.cpp"
+#include "i2cCommandReceiver.cpp"
 #include "registers.h"
 
 #define I2C_SLAVE_PORT i2c0
@@ -28,10 +28,6 @@ static struct Context
     bool processed = true;
 } context;
 
-Context ring_buffer[RING_BUFFER_COUNT];
-uint8_t ring_buffer_position = 0;
-uint8_t next_process_position = 0;
-
 void i2c_slave_handler(i2c_inst_t *i2c, i2c_slave_event_t event) {
     switch (event) {
 
@@ -41,10 +37,6 @@ void i2c_slave_handler(i2c_inst_t *i2c, i2c_slave_event_t event) {
                 uint8_t address = i2c_read_byte_raw(i2c);
                 context.mem_address = address;
                 context.mem_address_written = true;
-
-                //ring_buffer_position = (ring_buffer_position % RING_BUFFER_COUNT);
-                // context.bytes_received = 0;
-                // context.final_received = false;
             } else {
                 // master is writing data
                 uint8_t data = i2c_read_byte_raw(i2c);
@@ -63,9 +55,6 @@ void i2c_slave_handler(i2c_inst_t *i2c, i2c_slave_event_t event) {
             context.mem_address_written = false;
             context.final_received = true;
             context.processed = false;
-
-            // ring_buffer_position = (ring_buffer_position % RING_BUFFER_COUNT);
-            // ring_buffer[ring_buffer_position] = context;
             break;
 
         default:
@@ -79,7 +68,7 @@ void registers_init()
 {
     // Put some pretend values into the telemetry registers.
     // battery cell registers are - 0-255
-    registers[CELL0][1] = 255;
+    registers[CELL0][1] = 245;
     registers[CELL1][1] = 128;
     registers[CELL2][1] = 0;
 }
@@ -90,7 +79,6 @@ int main()
 {
     stdio_init_all();
     registers_init();
-    // setup_command_receiver();
     
     auto commandReceiver = I2cCommandReceiver(I2C_SLAVE_PORT);
     commandReceiver.setup_command_receiver(I2C_SLAVE_SDA_PIN, I2C_SLAVE_SCL_PIN, I2C_SLAVE_BAUDRATE, I2C_SLAVE_ADDRESS, &i2c_slave_handler);
