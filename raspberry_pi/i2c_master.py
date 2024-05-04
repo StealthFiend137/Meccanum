@@ -1,4 +1,5 @@
 from smbus import SMBus
+import gpiod
 import time
 
 # Telemetry Registers
@@ -26,17 +27,22 @@ DUTY1 = 0x0E
 LIGH0 = 0x0F
 LIGH1 = 0x10
 
+#chip = gpiod.Chip('gpiochip4')
+#scl = chip.get_line(2);
+#sda = chip.get_line(3);
+#print("I2C bus reset")
+
+
 bus = SMBus(1)
 chassis_address = 0x17;
 
 #bus.write_byte_data(chassis_address, 0x01, 0x02)
 
-#b = [1, 2, 3, 4, 5, 6, 8] # there are 8
-#bus.write_i2c_block_data(chassis_address, 0x01, b)
+b = [1, 2, 3, 4, 5, 6, 8] # there are 8
+bus.write_i2c_block_data(chassis_address, 0x00, b)
 
 time.sleep(0.01)
 adr = bus.read_i2c_block_data(chassis_address, CELL0, 3)
-
 print(adr)
 
 print("sent")
