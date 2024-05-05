@@ -23,9 +23,8 @@ int main()
     
     commandReceiver.setup_command_receiver(I2C_SLAVE_SDA_PIN, I2C_SLAVE_SCL_PIN, I2C_SLAVE_BAUDRATE, I2C_SLAVE_ADDRESS);
 
-    // int startTime = to_ms_since_boot(get_absolute_time());
-    int startTime = 0;
-    int changedRegisterCount;
+    int startTime = to_ms_since_boot(get_absolute_time());
+    int modifiedRegisterCount;
 
     while(1)
     {
@@ -34,13 +33,17 @@ int main()
         if(elapsed_time > 10)
         {
             startTime = to_ms_since_boot(get_absolute_time());
-            auto changedArray = commandReceiver.GetChangedRegisters(&changedRegisterCount);
-            if(changedRegisterCount > 0)
+
+            auto modifiedRegisters = commandReceiver.GetModifiedRegisters(&modifiedRegisterCount);
+            if(modifiedRegisterCount > 0)
             {
-                for(int i = 0; i < changedRegisterCount; i++)
+                printf("%d registers modified.\n", modifiedRegisterCount);
+                for(int i = 0; i < modifiedRegisterCount; i++)
                 {
-                    changedArray[i]->modified = false;
-                    printf("Register %d changed, new value %d\n", changedArray[i]->address, changedArray[i]->value);
+                    uint8_t registerAddress = modifiedRegisters[i];
+                    uint8_t registerValue = commandReceiver.GetRegisterValue(registerAddress);
+
+                    printf("register %x value changed to %x.\n", registerAddress, registerValue);
                 }
             }
         }

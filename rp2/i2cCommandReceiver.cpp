@@ -7,8 +7,7 @@
 
 class I2cCommandReceiver
 {
-
-public:
+private:
 
     struct MemoryRegister
     {
@@ -22,59 +21,13 @@ public:
             {}
     };
 
-private:
+    i2c_inst_t* i2c_instance;
 
-    inline static MemoryRegister* memoryRegisters[REGISTER_COUNT];
-    inline static MemoryRegister* changedRegisters[REGISTER_COUNT];
-
+    inline static uint8_t modifiedRegisters[REGISTER_COUNT];
     inline static uint8_t address = 0;
     inline static bool addressWritten = false;
 
-public:
-
-    const int RegisterCount = REGISTER_COUNT;
-
-    I2cCommandReceiver(i2c_inst_t* i2c)
-    {
-        i2c_instance = i2c;
-    }
-
-    void setup_command_receiver(uint sda_pin, uint scl_pin, uint baudrate, uint address)
-    {
-        registers_init();
-
-        gpio_init(sda_pin);
-        gpio_pull_up(sda_pin);
-        gpio_set_function(sda_pin, GPIO_FUNC_I2C);
-
-        gpio_init(scl_pin);
-        gpio_pull_up(scl_pin);
-        gpio_set_function(scl_pin, GPIO_FUNC_I2C);
-        
-        i2c_init(i2c_instance, baudrate);
-        i2c_slave_init(i2c_instance, address, i2c_slave_isr);
-    }
-
-    I2cCommandReceiver::MemoryRegister** GetChangedRegisters(int* count)
-    {
-        int changedRegistersCount = 0;
-
-        for(MemoryRegister* memRegister : memoryRegisters)
-        {
-            if(memRegister->modified)
-             {
-                 changedRegisters[changedRegistersCount] = memRegister;
-                 changedRegistersCount++;
-             }
-         }
-
-        *count = changedRegistersCount;
-        return changedRegisters;
-    }
-
-private:
-
-    i2c_inst_t* i2c_instance;
+    inline static MemoryRegister* memoryRegisters[REGISTER_COUNT];
 
     static void Register_Change(uint8_t address, uint8_t value)
     {
@@ -159,4 +112,50 @@ private:
                  break;
         }
     }
+
+public:
+
+    I2cCommandReceiver(i2c_inst_t* i2c)
+    {
+        i2c_instance = i2c;
+    }
+
+    void setup_command_receiver(uint sda_pin, uint scl_pin, uint baudrate, uint address)
+    {
+        registers_init();
+
+        gpio_init(sda_pin);
+        gpio_pull_up(sda_pin);
+        gpio_set_function(sda_pin, GPIO_FUNC_I2C);
+
+        gpio_init(scl_pin);
+        gpio_pull_up(scl_pin);
+        gpio_set_function(scl_pin, GPIO_FUNC_I2C);
+        
+        i2c_init(i2c_instance, baudrate);
+        i2c_slave_init(i2c_instance, address, i2c_slave_isr);
+    }
+
+    uint8_t* GetModifiedRegisters(int* count)
+    {
+        int modifiedRegisterCount = 0;
+        
+        for(MemoryRegister* memRegister : memoryRegisters)
+        {
+            if(memRegister->modified)
+            {
+                modifiedRegisters[modifiedRegisterCount] = memRegister->address;
+                modifiedRegisterCount++;
+            }
+        }
+
+        *count = modifiedRegisterCount;
+        return modifiedRegisters;
+    }
+
+    uint8_t GetRegisterValue(uint8_t address)
+    {
+        memoryRegisters[address]->modified = false;
+        return memoryRegisters[address]->value;
+    }    
 };

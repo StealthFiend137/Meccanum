@@ -43,11 +43,11 @@ chassis_address = 0x17;
 #b = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19] # there are 19
 #bus.write_i2c_block_data(chassis_address, 0x00, b)
 
-xUpdate = [1, 2, 0, 3, 4]
+xUpdate = [1, 2, 0, 3, 4, 0, 5, 6, 0]
 bus.write_i2c_block_data(chassis_address, XDIR0, xUpdate)
 
 time.sleep(0.01)
-adr = bus.read_i2c_block_data(chassis_address, XDIR0, 5)
+adr = bus.read_i2c_block_data(chassis_address, XDIR0, 9)
 print(adr)
 
 print("sent")
