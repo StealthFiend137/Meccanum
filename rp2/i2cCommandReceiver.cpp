@@ -12,6 +12,7 @@ public:
 
     struct MemoryRegister
     {
+        uint8_t address;
         uint8_t value;
         bool externallyModifiable;
         bool modified;
@@ -26,6 +27,7 @@ private:
 
 public:
 
+    const int RegisterCount = REGISTER_COUNT;
 
     I2cCommandReceiver(i2c_inst_t* i2c)
     {
@@ -107,6 +109,7 @@ private:
 
     static void Register_Set(uint8_t address, uint8_t value, bool externallyModifiable)
     {
+        memoryRegisters[address].address = address;
         memoryRegisters[address].value = value;
         memoryRegisters[address].externallyModifiable = externallyModifiable;
         memoryRegisters[address].modified = false;
