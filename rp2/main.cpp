@@ -23,38 +23,25 @@ int main()
     
     commandReceiver.setup_command_receiver(I2C_SLAVE_SDA_PIN, I2C_SLAVE_SCL_PIN, I2C_SLAVE_BAUDRATE, I2C_SLAVE_ADDRESS);
 
-    int start = to_ms_since_boot(get_absolute_time());
-    I2cCommandReceiver::MemoryRegister** changedRegisters = new I2cCommandReceiver::MemoryRegister*[commandReceiver.RegisterCount];
+    // int startTime = to_ms_since_boot(get_absolute_time());
+    int startTime = 0;
+    int changedRegisterCount;
 
     while(1)
     {
-        int elapsed_time = to_ms_since_boot(get_absolute_time()) - start; 
-        if(elapsed_time > 1000)
+        int elapsed_time = to_ms_since_boot(get_absolute_time()) - startTime; 
+
+        if(elapsed_time > 10)
         {
-            start = to_ms_since_boot(get_absolute_time());
-            if(commandReceiver.GetAnyRegisterChanged())
+            startTime = to_ms_since_boot(get_absolute_time());
+            auto changedArray = commandReceiver.GetChangedRegisters(&changedRegisterCount);
+            if(changedRegisterCount > 0)
             {
-                int changedArrayCount = commandReceiver.GetChangedArrays(changedRegisters);
-                printf("Number changed: %d\n", changedArrayCount);
-
-                // for(int i = 0; i<changedArrayCount; i++)
-                // {
-                //     I2cCommandReceiver::MemoryRegister* memreg = *(changedRegisters(i * sizeof(I2cCommandReceiver::MemoryRegister)));
-                //     printf("c%\n", memreg->value);
-                // }
-
-                for(int i = 0; i < changedArrayCount; i++)
+                for(int i = 0; i < changedRegisterCount; i++)
                 {
-                    I2cCommandReceiver::MemoryRegister* memreg = changedRegisters[i];
-                    printf("%u\n", memreg->value);
+                    changedArray[i]->modified = false;
+                    printf("Register %d changed, new value %d\n", changedArray[i]->address, changedArray[i]->value);
                 }
-                
-
-                commandReceiver.ClearAllChangedRegisters();
-            }
-            else
-            {
-                puts("no register changes");
             }
         }
         

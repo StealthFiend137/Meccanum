@@ -15,13 +15,18 @@ public:
         uint8_t address;
         uint8_t value;
         bool externallyModifiable;
-        bool modified;
+        bool modified = false;
+
+        MemoryRegister(uint8_t address, uint8_t value, bool externallyModifiable)
+            : address(address), value(value), externallyModifiable(externallyModifiable)
+            {}
     };
 
 private:
 
-    inline static MemoryRegister memoryRegisters[REGISTER_COUNT];
-    inline static bool registerChanged = false;
+    inline static MemoryRegister* memoryRegisters[REGISTER_COUNT];
+    inline static MemoryRegister* changedRegisters[REGISTER_COUNT];
+
     inline static uint8_t address = 0;
     inline static bool addressWritten = false;
 
@@ -32,7 +37,6 @@ public:
     I2cCommandReceiver(i2c_inst_t* i2c)
     {
         i2c_instance = i2c;
-        I2cCommandReceiver::registerChanged = false;
     }
 
     void setup_command_receiver(uint sda_pin, uint scl_pin, uint baudrate, uint address)
@@ -51,39 +55,21 @@ public:
         i2c_slave_init(i2c_instance, address, i2c_slave_isr);
     }
 
-    bool GetAnyRegisterChanged()
-    {
-        //return registerChanged;
-        return true;
-    }
-
-    void ClearAllChangedRegisters()
-    {
-        registerChanged = false;
-    }
-
-    MemoryRegister fakeMemreg = MemoryRegister();
-
-    int GetChangedArrays(I2cCommandReceiver::MemoryRegister** changedRegisters)
+    I2cCommandReceiver::MemoryRegister** GetChangedRegisters(int* count)
     {
         int changedRegistersCount = 0;
 
-        for(MemoryRegister memRegister : memoryRegisters)
+        for(MemoryRegister* memRegister : memoryRegisters)
         {
-            if(memRegister.modified || memRegister.externallyModifiable)
-            {
-                MemoryRegister* memRegisterPtr = &memRegister;
-                
-                //delete changedRegisters[changedRegistersCount];
-                changedRegisters[changedRegistersCount] = memRegisterPtr;
-                changedRegistersCount++;
+            if(memRegister->modified)
+             {
+                 changedRegisters[changedRegistersCount] = memRegister;
+                 changedRegistersCount++;
+             }
+         }
 
-                // changedRegisters[changedRegistersCount] = &memRegister;
-                // changedRegistersCount++;
-            }
-        }
-
-        return changedRegistersCount;
+        *count = changedRegistersCount;
+        return changedRegisters;
     }
 
 private:
@@ -92,57 +78,54 @@ private:
 
     static void Register_Change(uint8_t address, uint8_t value)
     {
-        if(!memoryRegisters[address].externallyModifiable) 
+        if(!memoryRegisters[address]->externallyModifiable) 
         {
             return;
         }
 
-        memoryRegisters[address].value = value;
-        memoryRegisters[address].modified = true;
-        registerChanged = true;
+        memoryRegisters[address]->modified = true;
+        memoryRegisters[address]->value = value;
     }
 
-    static uint8_t Register_Read(uint8_t address)
+    static uint8_t Register_External_Read(uint8_t address)
     {
-        return memoryRegisters[address].value;
+        return memoryRegisters[address]->value;
     }
 
-    static void Register_Set(uint8_t address, uint8_t value, bool externallyModifiable)
+    static void Register_Initialize(uint8_t address, uint8_t value, bool externallyModifiable)
     {
-        memoryRegisters[address].address = address;
-        memoryRegisters[address].value = value;
-        memoryRegisters[address].externallyModifiable = externallyModifiable;
-        memoryRegisters[address].modified = false;
+        // NB: No need to delete as there is no exit condition for the program.
+        memoryRegisters[address] = new MemoryRegister(address, value, externallyModifiable);
     }
 
     void registers_init()
     {
         // Telemetry Registers
-        Register_Set(CELL0, 1, false);
-        Register_Set(CELL1, 2, false);
-        Register_Set(CELL2, 3, false);
+        Register_Initialize(CELL0, 1, false);
+        Register_Initialize(CELL1, 2, false);
+        Register_Initialize(CELL2, 3, false);
 
         // Movement Registers
-        Register_Set(XDIR0, 4, true);
-        Register_Set(XDIR1, 5, true);
-        Register_Set(XDIRT, 6, false);
-        Register_Set(YDIR0, 7, true);
-        Register_Set(YDIR1, 8, true);
-        Register_Set(YDIRT, 9, false);
-        Register_Set(WDIR0, 10, true);
-        Register_Set(WDIR1, 0, true);
-        Register_Set(WDIRT, 0, false);
+        Register_Initialize(XDIR0, 4, true);
+        Register_Initialize(XDIR1, 5, true);
+        Register_Initialize(XDIRT, 6, false);
+        Register_Initialize(YDIR0, 7, true);
+        Register_Initialize(YDIR1, 8, true);
+        Register_Initialize(YDIRT, 9, false);
+        Register_Initialize(WDIR0, 10, true);
+        Register_Initialize(WDIR1, 0, true);
+        Register_Initialize(WDIRT, 0, false);
 
         // Sound Registers
-        Register_Set(SOUND, 0, true);
-        Register_Set(FREQ0, 0, true);
-        Register_Set(DUTY0, 0, true);
-        Register_Set(FREQ1, 0, true);
-        Register_Set(DUTY1, 0, true);
+        Register_Initialize(SOUND, 0, true);
+        Register_Initialize(FREQ0, 0, true);
+        Register_Initialize(DUTY0, 0, true);
+        Register_Initialize(FREQ1, 0, true);
+        Register_Initialize(DUTY1, 0, true);
 
         // Lighting Registers
-        Register_Set(LIGH0, 0, true);
-        Register_Set(LIGH1, 0, true);
+        Register_Initialize(LIGH0, 0, true);
+        Register_Initialize(LIGH1, 0, true);
     }
 
     static void i2c_slave_isr(i2c_inst_t *i2c, i2c_slave_event_t event)
@@ -164,7 +147,7 @@ private:
                 break;
 
             case I2C_SLAVE_REQUEST: // master is requesting data
-                i2c_write_byte_raw(i2c, Register_Read(address));
+                i2c_write_byte_raw(i2c, Register_External_Read(address));
                 address++;
                 break;
 
