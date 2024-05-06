@@ -2,8 +2,9 @@
 #include <pico/i2c_slave.h>
 #include "registers.h"
 #include <math.h>
+#include <pico/time.h>
 
-#define REGISTER_COUNT 19
+#define REGISTER_COUNT 16
 
 class I2cCommandReceiver
 {
@@ -14,11 +15,32 @@ private:
         uint8_t address;
         uint8_t value;
         bool externallyModifiable;
-        bool modified = false;
+        bool modified;
 
-        MemoryRegister(uint8_t address, uint8_t value, bool externallyModifiable)
+        bool decayTimer;
+        int default_decayTime_ms;
+        int remaining_decayTime_ms;
+
+        MemoryRegister(
+            uint8_t address, uint8_t value, bool externallyModifiable)
             : address(address), value(value), externallyModifiable(externallyModifiable)
-            {}
+            {
+                modified = false;
+
+                decayTimer = false;
+                default_decayTime_ms = 0;
+                remaining_decayTime_ms = 0;
+            }
+
+        MemoryRegister(
+            uint8_t address, uint8_t value, bool externallyModifiable, int default_decayTime_ms)
+            : address(address), value(value), externallyModifiable(externallyModifiable), default_decayTime_ms(default_decayTime_ms)
+            {
+                modified = false;
+
+                decayTimer = true;
+                remaining_decayTime_ms = 0;
+            }
     };
 
     i2c_inst_t* i2c_instance;
@@ -31,13 +53,21 @@ private:
 
     static void Register_Change(uint8_t address, uint8_t value)
     {
-        if(!memoryRegisters[address]->externallyModifiable) 
+        MemoryRegister *reg = memoryRegisters[address];
+
+        if(!reg->externallyModifiable) 
         {
             return;
         }
 
+        reg->value = value;
+
+        if(reg->decayTimer)
+        {
+            reg->remaining_decayTime_ms = reg->default_decayTime_ms;
+        };
+
         memoryRegisters[address]->modified = true;
-        memoryRegisters[address]->value = value;
     }
 
     static uint8_t Register_External_Read(uint8_t address)
@@ -51,6 +81,12 @@ private:
         memoryRegisters[address] = new MemoryRegister(address, value, externallyModifiable);
     }
 
+    static void Register_Initialize(uint8_t address, uint8_t value, bool externallyModifiable, int decayTime_ms)
+    {
+        // NB: No need to delete as there is no exit condition for the program.
+        memoryRegisters[address] = new MemoryRegister(address, value, externallyModifiable, decayTime_ms);
+    }
+
     void registers_init()
     {
         // Telemetry Registers
@@ -59,26 +95,24 @@ private:
         Register_Initialize(CELL2, 3, false);
 
         // Movement Registers
-        Register_Initialize(XDIR0, 4, true);
-        Register_Initialize(XDIR1, 5, true);
-        Register_Initialize(XDIRT, 6, false);
-        Register_Initialize(YDIR0, 7, true);
-        Register_Initialize(YDIR1, 8, true);
-        Register_Initialize(YDIRT, 9, false);
-        Register_Initialize(WDIR0, 10, true);
-        Register_Initialize(WDIR1, 0, true);
-        Register_Initialize(WDIRT, 0, false);
+        int movementTimeout_ms = 2000;
+        Register_Initialize(XDIR0, 4, true, movementTimeout_ms);
+        Register_Initialize(XDIR1, 5, true, movementTimeout_ms);
+        Register_Initialize(YDIR0, 6, true, movementTimeout_ms);
+        Register_Initialize(YDIR1, 7, true, movementTimeout_ms);
+        Register_Initialize(WDIR0, 8, true, movementTimeout_ms);
+        Register_Initialize(WDIR1, 9, true, movementTimeout_ms);
 
         // Sound Registers
-        Register_Initialize(SOUND, 0, true);
-        Register_Initialize(FREQ0, 0, true);
-        Register_Initialize(DUTY0, 0, true);
-        Register_Initialize(FREQ1, 0, true);
-        Register_Initialize(DUTY1, 0, true);
+        Register_Initialize(SOUND, 10, true);
+        Register_Initialize(FREQ0, 11, true);
+        Register_Initialize(DUTY0, 12, true);
+        Register_Initialize(FREQ1, 13, true);
+        Register_Initialize(DUTY1, 14, true);
 
         // Lighting Registers
-        Register_Initialize(LIGH0, 0, true);
-        Register_Initialize(LIGH1, 0, true);
+        Register_Initialize(LIGH0, 15, true);
+        Register_Initialize(LIGH1, 16, true);
     }
 
     static void i2c_slave_isr(i2c_inst_t *i2c, i2c_slave_event_t event)
@@ -112,12 +146,21 @@ private:
                  break;
         }
     }
+    
+    struct repeating_timer timer;
+
+    static bool movement_prune_callback(struct repeating_timer *t)
+    {
+        printf("repeating callback called\n");
+        return true;
+    };
 
 public:
 
     I2cCommandReceiver(i2c_inst_t* i2c)
     {
         i2c_instance = i2c;
+        add_repeating_timer_ms(2000, movement_prune_callback, NULL, &timer);
     }
 
     void setup_command_receiver(uint sda_pin, uint scl_pin, uint baudrate, uint address)
