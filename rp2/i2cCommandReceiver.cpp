@@ -18,8 +18,9 @@ private:
         bool modified;
 
         bool decayTimer;
-        int default_decayTime_ms;
-        int remaining_decayTime_ms;
+        int decayPeriod_ms;
+        int decayStartTimestamp;
+        bool decayStarted;
 
         MemoryRegister(
             uint8_t address, uint8_t value, bool externallyModifiable)
@@ -28,22 +29,26 @@ private:
                 modified = false;
 
                 decayTimer = false;
-                default_decayTime_ms = 0;
-                remaining_decayTime_ms = 0;
+                decayPeriod_ms = 0;
+                decayStartTimestamp = 0;
+                decayStarted = false;
             }
 
         MemoryRegister(
-            uint8_t address, uint8_t value, bool externallyModifiable, int default_decayTime_ms)
-            : address(address), value(value), externallyModifiable(externallyModifiable), default_decayTime_ms(default_decayTime_ms)
+            uint8_t address, uint8_t value, bool externallyModifiable, int decayPeriod_ms)
+            : address(address), value(value), externallyModifiable(externallyModifiable), decayPeriod_ms(decayPeriod_ms)
             {
                 modified = false;
 
                 decayTimer = true;
-                remaining_decayTime_ms = 0;
+                decayStartTimestamp = 0;
+                decayStarted = false;
             }
     };
 
     i2c_inst_t* i2c_instance;
+
+    struct repeating_timer decay_timer;
 
     inline static uint8_t modifiedRegisters[REGISTER_COUNT];
     inline static uint8_t address = 0;
@@ -64,10 +69,11 @@ private:
 
         if(reg->decayTimer)
         {
-            reg->remaining_decayTime_ms = reg->default_decayTime_ms;
+            reg->decayStartTimestamp = to_ms_since_boot(get_absolute_time());
+            reg->decayStarted = true;
         };
 
-        memoryRegisters[address]->modified = true;
+        reg->modified = true;
     }
 
     static uint8_t Register_External_Read(uint8_t address)
@@ -146,12 +152,26 @@ private:
                  break;
         }
     }
-    
-    struct repeating_timer timer;
 
     static bool movement_prune_callback(struct repeating_timer *t)
     {
-        printf("repeating callback called\n");
+        int ms_sinceBoot = to_ms_since_boot(get_absolute_time());
+
+        for(MemoryRegister* memRegister : memoryRegisters)
+        {
+            if(!memRegister->decayTimer || !memRegister->decayStarted)
+            {
+                continue;
+            };
+
+            if(ms_sinceBoot - memRegister->decayStartTimestamp > memRegister->decayPeriod_ms)
+            {
+                memRegister->value = 0;
+                memRegister->decayStarted = false;
+                memRegister->modified = true;
+            };
+        };
+
         return true;
     };
 
@@ -160,7 +180,8 @@ public:
     I2cCommandReceiver(i2c_inst_t* i2c)
     {
         i2c_instance = i2c;
-        add_repeating_timer_ms(2000, movement_prune_callback, NULL, &timer);
+        const int interval_ms = 20;
+        add_repeating_timer_ms(interval_ms, movement_prune_callback, NULL, &decay_timer);
     }
 
     void setup_command_receiver(uint sda_pin, uint scl_pin, uint baudrate, uint address)
