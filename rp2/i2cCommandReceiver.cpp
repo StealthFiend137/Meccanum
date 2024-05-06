@@ -93,7 +93,7 @@ private:
         memoryRegisters[address] = new MemoryRegister(address, value, externallyModifiable, decayTime_ms);
     }
 
-    void registers_init()
+    void registers_init(int movementTimeout_ms)
     {
         // Telemetry Registers
         Register_Initialize(CELL0, 1, false);
@@ -101,7 +101,6 @@ private:
         Register_Initialize(CELL2, 3, false);
 
         // Movement Registers
-        int movementTimeout_ms = 2000;
         Register_Initialize(XDIR0, 4, true, movementTimeout_ms);
         Register_Initialize(XDIR1, 5, true, movementTimeout_ms);
         Register_Initialize(YDIR0, 6, true, movementTimeout_ms);
@@ -184,9 +183,9 @@ public:
         add_repeating_timer_ms(interval_ms, movement_prune_callback, NULL, &decay_timer);
     }
 
-    void setup_command_receiver(uint sda_pin, uint scl_pin, uint baudrate, uint address)
+    void setup_command_receiver(uint sda_pin, uint scl_pin, uint baudrate, uint address, int movementTimeout_ms)
     {
-        registers_init();
+        registers_init(movementTimeout_ms);
 
         gpio_init(sda_pin);
         gpio_pull_up(sda_pin);

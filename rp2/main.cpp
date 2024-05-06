@@ -21,7 +21,7 @@ int main()
 {
     stdio_init_all();
     
-    commandReceiver.setup_command_receiver(I2C_SLAVE_SDA_PIN, I2C_SLAVE_SCL_PIN, I2C_SLAVE_BAUDRATE, I2C_SLAVE_ADDRESS);
+    commandReceiver.setup_command_receiver(I2C_SLAVE_SDA_PIN, I2C_SLAVE_SCL_PIN, I2C_SLAVE_BAUDRATE, I2C_SLAVE_ADDRESS, 500);
 
     int startTime = to_ms_since_boot(get_absolute_time());
     int modifiedRegisterCount;
