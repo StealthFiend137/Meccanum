@@ -1,11 +1,11 @@
 #include <cmath>
 
-/// @brief Meccanum drive drive wheel calculations.
+/// @brief Meccanum drive train wheel calculations.
 class Meccanum
 {
 public:
 
-    /// @brief For calculated wheel speeds.
+    /// @brief Container calculated wheel speeds.
     struct WheelSpeeds {
         double frontLeft;
         double frontRight;
@@ -20,6 +20,9 @@ private:
 
     /// @brief The distance widthwise between the middle of the chassis to the wheel
     float _guage;
+
+    /// @brief Precalculates the distance from the centre of the chassis to the wheel.
+    float _halfDiagonalLength;
 
     /// @brief 
     /// @param speeds 
@@ -44,20 +47,23 @@ public:
     /// @brief Constructs an instance of the Meccanum class.
     /// @param wheelBase The distance between the centre of the wheels front to back.
     /// @param track The distance between the centre of the wheels left to right.
-    Meccanum(const float wheelBase, const float guage) : _wheelBase(wheelBase), _guage(guage) {};
+    Meccanum(const float wheelBase, const float guage) : _wheelBase(wheelBase), _guage(guage)
+    {
+        _halfDiagonalLength = wheelBase + guage;
+    };
 
     /// @brief 
     /// @param vX Forwards velocity.
-    /// @param vY Wideways velocity.
+    /// @param vY Horizontal velocity.
     /// @param vW Rotational velocity.
     /// @return Returns the calculated speeds of the wheels.
     WheelSpeeds CalculateAngularVelocities(const double vX, const double vY, const double vW)
     {
         WheelSpeeds speeds;
-        speeds.frontLeft  = vX - vY - vW * (_wheelBase + _guage);
-        speeds.frontRight = vX + vY + vW * (_wheelBase + _guage);
-        speeds.rearLeft   = vX + vY - vW * (_wheelBase + _guage);
-        speeds.rearRight  = vX - vY + vW * (_wheelBase + _guage);
+        speeds.frontLeft  = vX - vY - vW * _halfDiagonalLength;
+        speeds.frontRight = vX + vY + vW * _halfDiagonalLength;
+        speeds.rearLeft   = vX + vY - vW * _halfDiagonalLength;
+        speeds.rearRight  = vX - vY + vW * _halfDiagonalLength;
         
         normalize(&speeds);
 
