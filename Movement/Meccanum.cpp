@@ -3,51 +3,64 @@
 /// @brief Meccanum drive drive wheel calculations.
 class Meccanum
 {
+public:
+
+    /// @brief For calculated wheel speeds.
+    struct WheelSpeeds {
+        double frontLeft;
+        double frontRight;
+        double rearLeft;
+        double rearRight;
+    };
+
 private:
 
-    /// @brief The distance betwee the centre of the wheels front to back.
+    /// @brief The distance lengthwise from the middle of the chassis to the wheel
     float _wheelBase;
 
-    /// @brief The distance between the centre of the wheels left to right.
-    float _track;
+    /// @brief The distance widthwise between the middle of the chassis to the wheel
+    float _guage;
+
+    /// @brief 
+    /// @param speeds 
+    void normalize(WheelSpeeds *speeds)
+    {
+        // Find the maximum speed among the wheels
+        double maxFront = std::max(std::abs(speeds->frontLeft), std::abs(speeds->frontRight));
+        double maxRear = std::max(std::abs(speeds->rearLeft), std::abs(speeds->rearRight));
+        double maxSpeed = std::max(maxFront, maxRear);
+
+        // If the maximum speed is greater than 1, normalize the speeds
+        if (maxSpeed > 1.0) {
+            speeds->frontLeft  /= maxSpeed;
+            speeds->frontRight /= maxSpeed;
+            speeds->rearLeft   /= maxSpeed;
+            speeds->rearRight  /= maxSpeed;
+        }
+    }
 
 public:
 
     /// @brief Constructs an instance of the Meccanum class.
     /// @param wheelBase The distance between the centre of the wheels front to back.
     /// @param track The distance between the centre of the wheels left to right.
-    Meccanum(float wheelBase, float track) : _wheelBase(wheelBase), _track(track) {};
+    Meccanum(const float wheelBase, const float guage) : _wheelBase(wheelBase), _guage(guage) {};
 
     /// @brief 
-    /// @param x 
-    /// @param y 
-    /// @param w 
-    /// @param L 
-    /// @param W 
-    /// @param wheelSpeeds 
-    void CalculateAngularVelocities(double x, double y, double w, double L, double W, double wheelSpeeds[4]) {
-        // L is the distance between front and back wheels (robot length)
-        // W is the distance between left and right wheels (robot width)
+    /// @param vX Forwards velocity.
+    /// @param vY Wideways velocity.
+    /// @param vW Rotational velocity.
+    /// @return Returns the calculated speeds of the wheels.
+    WheelSpeeds CalculateAngularVelocities(const double vX, const double vY, const double vW)
+    {
+        WheelSpeeds speeds;
+        speeds.frontLeft  = vX - vY - vW * (_wheelBase + _guage);
+        speeds.frontRight = vX + vY + vW * (_wheelBase + _guage);
+        speeds.rearLeft   = vX + vY - vW * (_wheelBase + _guage);
+        speeds.rearRight  = vX - vY + vW * (_wheelBase + _guage);
         
-        // Calculate the terms for the wheel speed equations
-        double r = sqrt((L * L) + (W * W));
-        double A = x - w * (L / r);
-        double B = x + w * (L / r);
-        double C = y - w * (W / r);
-        double D = y + w * (W / r);
-        
-        // Calculate the speed for each wheel
-        wheelSpeeds[0] = sqrt(B * B + C * C); // Front Left Wheel
-        wheelSpeeds[1] = sqrt(B * B + D * D); // Front Right Wheel
-        wheelSpeeds[2] = sqrt(A * A + D * D); // Rear Right Wheel
-        wheelSpeeds[3] = sqrt(A * A + C * C); // Rear Left Wheel
-        
-        // Optionally normalize the wheel speeds if needed (if any speed exceeds a certain max value)
-        double maxSpeed = fmax(fmax(wheelSpeeds[0], wheelSpeeds[1]), fmax(wheelSpeeds[2], wheelSpeeds[3]));
-        if (maxSpeed > 1.0) {
-            for (int i = 0; i < 4; ++i) {
-                wheelSpeeds[i] /= maxSpeed;
-            }
-        }
+        normalize(&speeds);
+
+        return speeds;
     }
 };
