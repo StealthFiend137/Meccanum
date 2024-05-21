@@ -1,4 +1,4 @@
-#include <cmath>
+#include <math.h>
 
 /// @brief Meccanum drive train wheel calculations.
 class Meccanum
@@ -33,14 +33,18 @@ private:
         double maxRear = std::max(std::abs(speeds->rearLeft), std::abs(speeds->rearRight));
         double maxSpeed = std::max(maxFront, maxRear);
 
-        // If the maximum speed is greater than 1, normalize the speeds
-        if (maxSpeed > 1.0) {
-            speeds->frontLeft  /= maxSpeed;
-            speeds->frontRight /= maxSpeed;
-            speeds->rearLeft   /= maxSpeed;
-            speeds->rearRight  /= maxSpeed;
+        if(maxSpeed <= 1)
+        {
+            // No normaliztion required.
+            return;
         }
-    }
+
+        // Normalize the speeds.
+        speeds->frontLeft  /= maxSpeed;
+        speeds->frontRight /= maxSpeed;
+        speeds->rearLeft   /= maxSpeed;
+        speeds->rearRight  /= maxSpeed;
+    };
 
 public:
 
@@ -68,5 +72,5 @@ public:
         normalize(&speeds);
 
         return speeds;
-    }
+    };
 };
