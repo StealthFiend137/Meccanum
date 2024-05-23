@@ -35,7 +35,7 @@ private:
 
 public:
 
-    SerialComamndReceiver(uart_inst_t* uart_inst) : _uart_instance(uart_inst)
+    SerialComamndReceiver(uart_inst_t* uart_inst, Chassis* chassis) : _uart_instance(uart_inst)
     {
     };
 

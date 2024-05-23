@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "registers.h"
-
+#include "chassis.cpp"
 #include <hardware/i2c.h>
 #include <pico/i2c_slave.h>
 #include "i2cCommandReceiver.cpp"
@@ -25,8 +25,10 @@ static const uint I2C_SLAVE_SCL_PIN = 17; // Yellow
 static const uint I2C_SLAVE_ADDRESS = 0x17;
 static const uint I2C_SLAVE_BAUDRATE = 100000; // 100 kHz
 
-I2cCommandReceiver i2cCommandReceiver(I2C_SLAVE_PORT);
-SerialComamndReceiver serialComamndReceiver(UART_INSTANCE);
+
+Chassis chassis(500);
+I2cCommandReceiver i2cCommandReceiver(I2C_SLAVE_PORT, &chassis);
+SerialComamndReceiver serialComamndReceiver(UART_INSTANCE, &chassis);
 
 int movementIntervalStartTime = to_ms_since_boot(get_absolute_time());
 int modifiedRegisterCount;

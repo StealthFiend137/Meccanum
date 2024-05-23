@@ -176,7 +176,7 @@ private:
 
 public:
 
-    I2cCommandReceiver(i2c_inst_t* i2c)
+    I2cCommandReceiver(i2c_inst_t* i2c, Chassis* chassis)
     {
         i2c_instance = i2c;
         const int interval_ms = 20;
