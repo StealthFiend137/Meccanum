@@ -25,7 +25,6 @@ static const uint I2C_SLAVE_SCL_PIN = 17; // Yellow
 static const uint I2C_SLAVE_ADDRESS = 0x17;
 static const uint I2C_SLAVE_BAUDRATE = 100000; // 100 kHz
 
-
 Chassis chassis(500);
 I2cCommandReceiver i2cCommandReceiver(I2C_SLAVE_PORT, &chassis);
 SerialComamndReceiver serialComamndReceiver(UART_INSTANCE, &chassis);
@@ -58,16 +57,18 @@ void action_movement(int ms_since_boot)
     movementIntervalStartTime = ms_since_boot;
 
     auto modifiedRegisters = i2cCommandReceiver.GetModifiedRegisters(&modifiedRegisterCount);
-    if(modifiedRegisterCount > 0)
+    if(0 == modifiedRegisterCount)
     {
-        printf("%d registers modified.\n", modifiedRegisterCount);
-        for(int i = 0; i < modifiedRegisterCount; i++)
-        {
-            uint8_t registerAddress = modifiedRegisters[i];
-            uint8_t registerValue = i2cCommandReceiver.GetRegisterValue(registerAddress);
+        return;
+    }
 
-            printf("register %x value changed to %x.\n", registerAddress, registerValue);
-        }
+    printf("%d registers modified.\n", modifiedRegisterCount);
+    for(int i = 0; i < modifiedRegisterCount; i++)
+    {
+        uint8_t registerAddress = modifiedRegisters[i];
+        uint8_t registerValue = i2cCommandReceiver.GetRegisterValue(registerAddress);
+
+        printf("register %x value changed to %x.\n", registerAddress, registerValue);
     }
 }
 

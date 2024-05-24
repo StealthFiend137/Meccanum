@@ -1,5 +1,6 @@
 #include <hardware/i2c.h>
 #include <pico/i2c_slave.h>
+#include "chassis.cpp"
 #include "registers.h"
 #include <math.h>
 #include <pico/time.h>
@@ -47,6 +48,7 @@ private:
     };
 
     i2c_inst_t* i2c_instance;
+    Chassis* chassis_instance;
 
     struct repeating_timer decay_timer;
 
@@ -179,6 +181,8 @@ public:
     I2cCommandReceiver(i2c_inst_t* i2c, Chassis* chassis)
     {
         i2c_instance = i2c;
+        chassis_instance = chassis;
+
         const int interval_ms = 20;
         add_repeating_timer_ms(interval_ms, movement_prune_callback, NULL, &decay_timer);
     }
