@@ -1,9 +1,10 @@
 #include <hardware/i2c.h>
 #include <pico/i2c_slave.h>
-#include "chassis.cpp"
-#include "registers.h"
 #include <math.h>
 #include <pico/time.h>
+
+#include "chassis.cpp"
+#include "registers.h"
 
 #define REGISTER_COUNT 16
 
