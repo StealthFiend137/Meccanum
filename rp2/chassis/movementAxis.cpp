@@ -1,13 +1,14 @@
 #pragma once
-#include "movementAxis.h"
 #include <pico/time.h>
+#include "movementAxis.h"
+#include "velocity.h"
 
 /// @brief Sets the speed of the axis and the time to set as the start point.
 /// @param speed The speed of the axis.
 /// @param start_time The start time.
 void MovementAxis::set_speed(int speed, int start_time)
 {
-    _speed = speed;
+    _velocity = Velocity(speed);
     StartTime = start_time;
 };
 
@@ -25,5 +26,5 @@ void MovementAxis::set_speed(int speed)
 int MovementAxis::get_speed(void)
 {
     ChangedSinceLastRead = false;
-    return _speed;
+    return _velocity.Get();
 };

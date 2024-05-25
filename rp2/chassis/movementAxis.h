@@ -1,10 +1,11 @@
 #pragma once
+#include "velocity.h"
 
 struct MovementAxis
 {
 private:
 
-    int _speed;
+    Velocity _velocity;
     int StartTime;
     bool ChangedSinceLastRead;
 
