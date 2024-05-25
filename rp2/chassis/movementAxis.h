@@ -1,17 +1,16 @@
 #pragma once
-#include "velocity.h"
 
 struct MovementAxis
 {
 private:
 
-    Velocity _velocity;
+    int _velocity = 0;
     int StartTime;
     bool ChangedSinceLastRead;
 
 public:
 
-    void set_speed(int speed, int start_time);
     void set_speed(int speed);
+    void set_speed(int speed, int start_time);
     int get_speed(void);
 };
