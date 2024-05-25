@@ -20,6 +20,22 @@ public:
     /// @return Returns the speed of the axis. 
     int get_x_axis();
 
+    /// @brief Sets the speed of the axis.
+    /// @param speed The requested speed of the axis.
+    void set_y_axis(int speed);
+
+    /// @brief Gets the speed of the axis.
+    /// @return Returns the speed of the axis. 
+    int get_y_axis();
+
+    /// @brief Sets the speed of the axis.
+    /// @param speed The requested speed of the axis.
+    void set_w_axis(int speed);
+
+    /// @brief Gets the speed of the axis.
+    /// @return Returns the speed of the axis. 
+    int get_w_axis();
+
 private:
 
     Movement _movement;
