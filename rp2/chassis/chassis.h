@@ -41,16 +41,18 @@ public:
     /// @return Returns the speed of the axis. 
     int get_w_axis();
 
-    void register_callback(void(*callback)());
-
-    enum ModificationFlags
+    enum Modified
     {
         xAxisModified = 1 >> 0,
         yAxisModified = 1 >> 1,
         wAxisModified = 1 >> 2
     };
 
+    void register_callback(Modified (*callback)());
+
 private:
+
+    Modified modified;
 
     /// @brief The x axis.
     MovementAxis xAxis;
@@ -62,21 +64,23 @@ private:
     MovementAxis wAxis;
 
     /// @brief Vector of callbacks used to notify of changes to chassis values.
-    std::vector<void (*)()> _modificationCallbacks;
+    std::vector<Modified (*)()> _modificationCallbacks;
 
     /// @brief Backing field for the amount of time in milliseconds without renewall until an action is stopped.
     uint _command_timeout_ms;
 
     /// @brief Private method to set the speed of a provided axis.
-    /// @param movementAxis The axis to set.
     /// @param speed The speed to set the axis to.
-    void set_axis(MovementAxis* movementAxis, int speed);
+    /// @param movementAxis The axis to set.
+    /// @param modifiedAxis The bitwise value of the modified axis.
+    void set_axis(int speed, MovementAxis* movementAxis, Modified modifiedAxis);
 
     /// @brief Private method to set the speed of a provided axis at a specified time.
     /// @param movementAxis The axis to set.
     /// @param speed The speed to set the axis to.
+    /// @param modifiedAxis The bitwise value of the modified axis.
     /// @param update_time The time to record as when this change was made.
-    void set_axis(MovementAxis* movementAxis, int speed, int start_time);
+    void set_axis(int speed, MovementAxis* movementAxis, Modified modifiedAxis, int update_time);
 
     /// @brief Private method to get the speed of a specified axis.
     /// @param MovementAxis The axis to get the speed of.

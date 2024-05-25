@@ -14,17 +14,19 @@ Chassis::Chassis(uint comamnd_timeout_ms) : _command_timeout_ms(comamnd_timeout_
 /// @param wVelocity The value of the w axis.
 void Chassis::set_all_axis(int xVelocity, int yVelocity, int wVelocity)
 {
-    int start_time = to_ms_since_boot(get_absolute_time());
-    set_axis(&xAxis, xVelocity, start_time);
-    set_axis(&yAxis, yVelocity, start_time);
-    set_axis(&wAxis, wVelocity, start_time);
+    int modified_time = to_ms_since_boot(get_absolute_time());
+    set_axis(xVelocity, &xAxis, xAxisModified, modified_time);
+    set_axis(yVelocity, &yAxis, yAxisModified, modified_time);
+    set_axis(wVelocity, &wAxis, wAxisModified, modified_time);
 };
 
 /// @brief Sets the value of the x axis.
 /// @param velocity The value of the x axis.
 void Chassis::set_x_axis(int velocity)
 {
-    set_axis(&xAxis, velocity);
+    Modified modifiedAxis = xAxisModified;
+    MovementAxis* axis = &xAxis;
+    set_axis(velocity, axis, modifiedAxis);
 };
 
 /// @brief Gets the value of the x axis.
@@ -38,7 +40,9 @@ int Chassis::get_x_axis()
 /// @param velocity The value of the y axis.
 void Chassis::set_y_axis(int velocity)
 {
-    set_axis(&yAxis, velocity);
+    Modified modifiedAxis = yAxisModified;
+    MovementAxis* axis = &yAxis;
+    set_axis(velocity, axis, modifiedAxis);
 };
 
 /// @brief Gets the value of the y axis.
@@ -52,7 +56,9 @@ int Chassis::get_y_axis()
 /// @param velocity The value of the w axis.
 void Chassis::set_w_axis(int velocity)
 {
-    set_axis(&wAxis, velocity);
+    Modified modifiedAxis = wAxisModified;
+    MovementAxis* axis = &wAxis;
+    set_axis(velocity, axis, modifiedAxis);
 };
 
 /// @brief Gets the value of the w axis.c++ 
@@ -62,27 +68,26 @@ int Chassis::get_w_axis()
     return get_axis(&wAxis);
 };
 
-void Chassis::register_callback(void(*callback)())
+void Chassis::register_callback(Modified (*callback)())
 {
     this->_modificationCallbacks.push_back(callback);
 };
 
 /// @brief Private method to set the speed of a provided axis.
-/// @param movementAxis The axis to set.
 /// @param speed The speed to set the axis to.
-void Chassis::set_axis(MovementAxis* movementAxis, int speed)
+/// @param movementAxis The axis to set.
+/// @param modifiedAxis The bitwise value of the modified axis.
+void Chassis::set_axis(int speed, MovementAxis* movementAxis, Modified modifiedAxis)
 {
     movementAxis->set_speed(speed);
-    // ModificationFlags flags = static_cast<ModificationFlags>(
-    //     xAxisModified | yAxisModified | wAxisModified
-    // );
 };
 
 /// @brief Private method to set the speed of a provided axis at a specified time.
 /// @param movementAxis The axis to set.
 /// @param speed The speed to set the axis to.
+/// @param modifiedAxis The bitwise value of the modified axis.
 /// @param update_time The time to record as when this change was made.
-void Chassis::set_axis(MovementAxis* movementAxis, int speed, int update_time)
+void Chassis::set_axis(int speed, MovementAxis* movementAxis, Modified modifiedAxis, int update_time)
 {
     movementAxis->set_speed(speed, update_time);
 };
