@@ -5,7 +5,7 @@
 #include <pico/i2c_slave.h>
 
 #include "registers.h"
-#include "chassis.h"
+#include "chassis/chassis.h"
 #include "i2cCommandReceiver.cpp"
 
 #include <hardware/uart.h>

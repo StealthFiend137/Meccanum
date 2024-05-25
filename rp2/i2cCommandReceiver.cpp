@@ -3,7 +3,7 @@
 #include <math.h>
 #include <pico/time.h>
 
-#include "chassis.cpp"
+#include "chassis/chassis.cpp"
 #include "registers.h"
 
 #define REGISTER_COUNT 16
