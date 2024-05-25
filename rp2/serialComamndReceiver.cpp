@@ -1,14 +1,15 @@
 #pragma once
 
-#include "hardware/uart.h"
+#include <functional>
+#include <hardware/uart.h>
 
-class SerialComamndReceiver
+class SerialCommandReceiver
 {
 private:
 
-    uart_inst_t* _uart_instance; 
+    uart_inst_t* _uart_instance;
 
-    static void uart_rx_isr(uart_inst_t* uart_inst)
+    void uart_rx_isr(uart_inst_t* uart_inst)
     {
         
         while (uart_is_readable(uart_inst)) {
@@ -25,17 +26,19 @@ private:
 
     static void uart0_rx_isr()
     {
-        uart_rx_isr(uart0);
-    }
+        _serialCommandReceiver_instance->uart_rx_isr(uart0);
+    };
 
     static void uart1_rx_isr()
     {
-        uart_rx_isr(uart1);
-    }
+        _serialCommandReceiver_instance->uart_rx_isr(uart1);
+    };
 
 public:
 
-    SerialComamndReceiver(uart_inst_t* uart_inst, Chassis* chassis) : _uart_instance(uart_inst)
+    static inline SerialCommandReceiver* _serialCommandReceiver_instance = nullptr;
+
+    SerialCommandReceiver(uart_inst_t* uart_inst, Chassis* chassis) : _uart_instance(uart_inst)
     {
     };
 
@@ -63,6 +66,8 @@ public:
         uart_set_fifo_enabled(_uart_instance, false);
 
         // Set up the RX handler
+        _serialCommandReceiver_instance = this;
+
         int UART_IRQ = _uart_instance == uart0 ? UART0_IRQ : UART1_IRQ;
         irq_handler_t uart_isr = _uart_instance == uart0 ? uart0_rx_isr : uart1_rx_isr;
         irq_set_exclusive_handler(UART_IRQ, uart_isr);
