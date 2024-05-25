@@ -48,7 +48,7 @@ public:
         wAxisModified = 1 >> 2
     };
 
-    void register_callback(Modified (*callback)());
+    void register_callback(void (*callback)(Modified));
 
 private:
 
@@ -64,7 +64,7 @@ private:
     MovementAxis wAxis;
 
     /// @brief Vector of callbacks used to notify of changes to chassis values.
-    std::vector<Modified (*)()> _modificationCallbacks;
+    std::vector<void (*)(Modified)> _modificationCallbacks;
 
     /// @brief Backing field for the amount of time in milliseconds without renewall until an action is stopped.
     uint _command_timeout_ms;
