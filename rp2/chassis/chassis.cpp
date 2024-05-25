@@ -10,51 +10,51 @@ Chassis::Chassis(uint comamnd_timeout_ms) : _command_timeout_ms(comamnd_timeout_
 void Chassis::set_all_axis(int xVelocity, int yVelocity, int wVelocity)
 {
     int start_time = to_ms_since_boot(get_absolute_time());
-    set_axis(&_movement.xAxis, xVelocity, start_time);
-    set_axis(&_movement.yAxis, yVelocity, start_time);
-    set_axis(&_movement.wAxis, wVelocity, start_time);
+    set_axis(&xAxis, xVelocity, start_time);
+    set_axis(&yAxis, yVelocity, start_time);
+    set_axis(&wAxis, wVelocity, start_time);
 };
 
 /// @brief Sets the value of the x axis.
 /// @param velocity The value of the x axis.
 void Chassis::set_x_axis(int velocity)
 {
-    set_axis(&_movement.xAxis, velocity);
+    set_axis(&xAxis, velocity);
 };
 
 /// @brief Gets the value of the x axis.
 /// @return Returns the value of the x axis.
 int Chassis::get_x_axis()
 {
-    return get_axis(&_movement.xAxis);
+    return get_axis(&xAxis);
 };
 
 /// @brief Sets the value of the y axis.
 /// @param velocity The value of the y axis.
 void Chassis::set_y_axis(int velocity)
 {
-    set_axis(&_movement.yAxis, velocity);
+    set_axis(&yAxis, velocity);
 };
 
 /// @brief Gets the value of the y axis.
 /// @return Returns the value of the y axis.
 int Chassis::get_y_axis()
 {
-    return get_axis(&_movement.yAxis);
+    return get_axis(&yAxis);
 };
 
 /// @brief Sets the value of the w axis.
 /// @param velocity The value of the w axis.
 void Chassis::set_w_axis(int velocity)
 {
-    set_axis(&_movement.wAxis, velocity);
+    set_axis(&wAxis, velocity);
 };
 
 /// @brief Gets the value of the w axis.
 /// @return Returns the value of the w axis.
 int Chassis::get_w_axis()
 {
-    return get_axis(&_movement.wAxis);
+    return get_axis(&wAxis);
 };
 
 /// Private

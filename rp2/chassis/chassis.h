@@ -1,5 +1,4 @@
 #pragma once
-#include "movement.h"
 #include "movementAxis.h"
 
 class Chassis
@@ -38,7 +37,9 @@ public:
 
 private:
 
-    Movement _movement;
+    MovementAxis xAxis;
+    MovementAxis yAxis;
+    MovementAxis wAxis;
 
     /// @brief Backing field for the amount of time in milliseconds without renewall until an action is stopped.
     uint _command_timeout_ms;
