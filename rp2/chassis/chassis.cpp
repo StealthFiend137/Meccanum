@@ -1,12 +1,12 @@
-#include "chassis.h"
 #include <pico/stdlib.h>
-#include <vector>
 #include <algorithm>
+#include "chassis.h"
 
 /// @brief Creates a new instance of the Chassis class.
 /// @param comamnd_timeout_ms The timeout in ms before items return to their default state.
-Chassis::Chassis(uint comamnd_timeout_ms) : _command_timeout_ms(comamnd_timeout_ms)
+Chassis::Chassis(const uint comamnd_timeout_ms)
 {
+    this->_command_timeout_ms = comamnd_timeout_ms;
 };
 
 /// @brief Sets all of the movement axes simultaneously.
@@ -69,10 +69,10 @@ int Chassis::get_w_axis()
     return get_axis(&wAxis);
 };
 
-void Chassis::register_callback(void (*callback)(Modified))
-{
-    this->_modificationCallbacks.push_back(callback);
-};
+// void Chassis::register_callback(void (*callback)(Modified))
+// {
+//     this->_modificationCallbacks.push_back(callback);
+// };
 
 /// @brief Private method to set the speed of a provided axis.
 /// @param speed The speed to set the axis to.
@@ -93,9 +93,9 @@ void Chassis::set_axis(int speed, MovementAxis* movementAxis, Modified modifiedA
 {
     movementAxis->set_speed(speed, update_time);
 
-    std::for_each(_modificationCallbacks.begin(), _modificationCallbacks.end(), [modifiedAxis](void (*callback)(Modified)) {
-        callback(modifiedAxis);
-    });
+//     std::for_each(this->_modificationCallbacks.begin(), this->_modificationCallbacks.end(), [modifiedAxis](void (*callback)(Modified)) {
+//         callback(modifiedAxis);
+//     });
 };
 
 /// @brief Private method to get the speed of a specified axis.

@@ -7,7 +7,6 @@ set(CMAKE_CXX_STANDARD 17)
 
 # Initialise pico_sdk from installed location
 # (note this can come from environment, CMake cache etc)
-#set(PICO_SDK_PATH "/home/pi/pico/pico-sdk")
 set(PICO_SDK_PATH "${PICO_SDK_PATH}")
 
 set(PICO_BOARD pico CACHE STRING "Board type")
@@ -25,8 +24,9 @@ project(main C CXX ASM)
 pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
-
 add_executable(main main.cpp )
+add_subdirectory(chassis)
+add_subdirectory(i2cCommandReceiver)
 
 pico_set_program_name(main "main")
 pico_set_program_version(main "0.1")
@@ -51,4 +51,3 @@ target_link_libraries(main
         )
 
 pico_add_extra_outputs(main)
-

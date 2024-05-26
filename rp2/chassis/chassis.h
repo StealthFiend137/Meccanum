@@ -1,5 +1,4 @@
 #pragma once
-#include <vector>
 #include "movementAxis.h"
 
 /// @brief Control and monitoring of the meccanum chassis.
@@ -9,7 +8,7 @@ public:
 
     /// @brief Create a new instance of the Chassis class.
     /// @param comamnd_timeout_ms The amount of time in milliseconds until a command is cancelled. The time is reset every time it is refreshed.
-    Chassis(uint comamnd_timeout_ms);
+    Chassis(const uint comamnd_timeout_ms);
 
     /// @brief Sets all of the movement axes simultaneously.
     /// @param xVelocity The value of the x axis.
@@ -41,6 +40,7 @@ public:
     /// @return Returns the speed of the axis. 
     int get_w_axis();
 
+    /// @brief 
     enum Modified
     {
         xAxisModified = 1 >> 0,
@@ -48,11 +48,11 @@ public:
         wAxisModified = 1 >> 2
     };
 
-    void register_callback(void (*callback)(Modified));
+    /// @brief 
+    /// @param callback 
+    //void register_callback(void (*callback)(Modified));
 
 private:
-
-    Modified modified;
 
     /// @brief The x axis.
     MovementAxis xAxis;
@@ -64,7 +64,7 @@ private:
     MovementAxis wAxis;
 
     /// @brief Vector of callbacks used to notify of changes to chassis values.
-    std::vector<void (*)(Modified)> _modificationCallbacks;
+    //std::vector<void (*)(Modified)> _modificationCallbacks;
 
     /// @brief Backing field for the amount of time in milliseconds without renewall until an action is stopped.
     uint _command_timeout_ms;

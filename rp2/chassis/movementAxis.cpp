@@ -1,4 +1,5 @@
 #include <pico/time.h>
+#include <algorithm>
 #include "movementAxis.h"
 
 /// @brief Sets the speed of the axis and the time to set as the start point.
