@@ -7,6 +7,15 @@
 uint8_t I2cCommandReceiver::modifiedRegisters[REGISTER_COUNT];
 MemoryRegister* I2cCommandReceiver::memoryRegisters[REGISTER_COUNT];
 
+I2cCommandReceiver::I2cCommandReceiver(i2c_inst_t* i2c, Chassis* chassis)
+{
+    this->i2c_instance = i2c;
+    I2cCommandReceiver::chassis_instance = chassis;
+
+    const int interval_ms = 20;
+    add_repeating_timer_ms(interval_ms, movement_prune_callback, NULL, &decay_timer);
+};
+
 void I2cCommandReceiver::Register_Change(uint8_t address, uint8_t value)
 {
     MemoryRegister *reg = memoryRegisters[address];
@@ -91,10 +100,11 @@ void I2cCommandReceiver::i2c_slave_isr(i2c_inst_t *i2c, i2c_slave_event_t event)
 
         case I2C_SLAVE_FINISH: // master has signalled Stop / Restart
             addressWritten = false;
+            I2cCommandReceiver::chassis_instance->wAxisModified;
             break;
 
-            default:
-                break;
+        default:
+            break;
     }
 };
 
@@ -118,15 +128,6 @@ bool I2cCommandReceiver::movement_prune_callback(struct repeating_timer *t)
     };
 
     return true;
-};
-
-I2cCommandReceiver::I2cCommandReceiver(i2c_inst_t* i2c, Chassis* chassis)
-{
-    i2c_instance = i2c;
-    chassis_instance = chassis;
-
-    const int interval_ms = 20;
-    add_repeating_timer_ms(interval_ms, movement_prune_callback, NULL, &decay_timer);
 };
 
 void I2cCommandReceiver::setup_command_receiver(uint sda_pin, uint scl_pin, uint baudrate, uint address, int movementTimeout_ms)

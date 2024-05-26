@@ -1,8 +1,9 @@
-#include "AxisState.h"
+#include <algorithm>
+#include "axisState.h"
 
 AxisState::AxisState(int default_speed, int decay_time_ms)
 {
-    this->default_speed = default_speed;
+    this->default_speed = std::clamp(default_speed, -100, 100);
     this->decay_time_ms = decay_time_ms;
 };
 
@@ -20,7 +21,7 @@ void AxisState::set_speed(int speed, int update_time)
 {
     this->isDecaying = true;
     this->decayStartTimestamp = update_time;
-    this->speed = speed;
+    this->speed = std::clamp(speed, -100, 100);;
 };
 
 int AxisState::get_speed()

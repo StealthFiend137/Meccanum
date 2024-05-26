@@ -3,7 +3,7 @@
 #include <algorithm>
 
 #include "chassis.h"
-#include "AxisState.h"
+#include "axisState.h"
 
 struct AxesStatus
 {
@@ -64,7 +64,7 @@ void Chassis::set_all_axis(int xVelocity, int yVelocity, int wVelocity)
 void Chassis::set_x_axis(int velocity)
 {
     Modified modifiedAxis = xAxisModified;
-    MovementAxis* axis = &xAxis;
+    AxisState* axis = &xAxis;
     set_axis(velocity, axis, modifiedAxis);
 };
 
@@ -80,7 +80,7 @@ int Chassis::get_x_axis()
 void Chassis::set_y_axis(int velocity)
 {
     Modified modifiedAxis = yAxisModified;
-    MovementAxis* axis = &yAxis;
+    AxisState* axis = &yAxis;
     set_axis(velocity, axis, modifiedAxis);
 };
 
@@ -96,7 +96,7 @@ int Chassis::get_y_axis()
 void Chassis::set_w_axis(int velocity)
 {
     Modified modifiedAxis = wAxisModified;
-    MovementAxis* axis = &wAxis;
+    AxisState* axis = &wAxis;
     set_axis(velocity, axis, modifiedAxis);
 };
 
@@ -116,7 +116,7 @@ int Chassis::get_w_axis()
 /// @param speed The speed to set the axis to.
 /// @param movementAxis The axis to set.
 /// @param modifiedAxis The bitwise value of the modified axis.
-void Chassis::set_axis(int speed, MovementAxis* movementAxis, Modified modifiedAxis)
+void Chassis::set_axis(int speed, AxisState* movementAxis, Modified modifiedAxis)
 {
     int update_time = to_ms_since_boot(get_absolute_time());
     set_axis(speed, movementAxis, modifiedAxis, update_time);
@@ -127,7 +127,7 @@ void Chassis::set_axis(int speed, MovementAxis* movementAxis, Modified modifiedA
 /// @param speed The speed to set the axis to.
 /// @param modifiedAxis The bitwise value of the modified axis.
 /// @param update_time The time to record as when this change was made.
-void Chassis::set_axis(int speed, MovementAxis* movementAxis, Modified modifiedAxis, int update_time)
+void Chassis::set_axis(int speed, AxisState* movementAxis, Modified modifiedAxis, int update_time)
 {
     movementAxis->set_speed(speed, update_time);
 
@@ -139,7 +139,7 @@ void Chassis::set_axis(int speed, MovementAxis* movementAxis, Modified modifiedA
 /// @brief Private method to get the speed of a specified axis.
 /// @param MovementAxis The axis to get the speed of.
 /// @return Returns the speed of the provided axis.
-int Chassis::get_axis(MovementAxis* MovementAxis)
+int Chassis::get_axis(AxisState* MovementAxis)
 {
     return MovementAxis->get_speed();
 };

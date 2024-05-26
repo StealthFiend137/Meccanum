@@ -1,5 +1,5 @@
 #pragma once
-#include "movementAxis.h"
+#include "axisState.h"
 
 /// @brief Control and monitoring of the meccanum chassis.
 class Chassis
@@ -37,7 +37,7 @@ public:
     void set_w_axis(int speed);
 
     /// @brief Gets the speed of the axis.
-    /// @return Returns the speed of the axis. 
+    /// @return Returns theMovementAxis speed of the axis. 
     int get_w_axis();
 
     /// @brief 
@@ -65,13 +65,13 @@ private:
     static bool decay_callback(struct repeating_timer *t);
 
     /// @brief The x axis.
-    MovementAxis xAxis;
+    AxisState xAxis{0, 500};
 
     /// @brief The y axis.
-    MovementAxis yAxis;
+    AxisState yAxis{0, 500};
 
     /// @brief The w axis.
-    MovementAxis wAxis;
+    AxisState wAxis{0, 500};
 
     /// @brief Vector of callbacks used to notify of changes to chassis values.
     //std::vector<void (*)(Modified)> _modificationCallbacks;
@@ -83,19 +83,19 @@ private:
     /// @param speed The speed to set the axis to.
     /// @param movementAxis The axis to set.
     /// @param modifiedAxis The bitwise value of the modified axis.
-    void set_axis(int speed, MovementAxis* movementAxis, Modified modifiedAxis);
+    void set_axis(int speed, AxisState* movementAxis, Modified modifiedAxis);
 
     /// @brief Private method to set the speed of a provided axis at a specified time.
     /// @param movementAxis The axis to set.
     /// @param speed The speed to set the axis to.
     /// @param modifiedAxis The bitwise value of the modified axis.
     /// @param update_time The time to record as when this change was made.
-    void set_axis(int speed, MovementAxis* movementAxis, Modified modifiedAxis, int update_time);
+    void set_axis(int speed, AxisState* movementAxis, Modified modifiedAxis, int update_time);
 
     /// @brief Private method to get the speed of a specified axis.
     /// @param MovementAxis The axis to get the speed of.
     /// @return Returns the speed of the provided axis.
-    int get_axis(MovementAxis* MovementAxis);
+    int get_axis(AxisState* MovementAxis);
 
 
     void get_changed_axes(int current_time);

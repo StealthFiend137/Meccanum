@@ -15,8 +15,8 @@ private:
     /// @brief Backng field for the hardware i2c instance.
     i2c_inst_t* i2c_instance;
 
-    /// @brief Backing field for the chassis instance.
-    Chassis* chassis_instance;
+    /// @brief 
+    static inline Chassis* chassis_instance;
 
     struct repeating_timer decay_timer;
 
