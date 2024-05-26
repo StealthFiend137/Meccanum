@@ -18,8 +18,6 @@ private:
     /// @brief 
     static inline Chassis* chassis_instance;
 
-    struct repeating_timer decay_timer;
-
     static uint8_t modifiedRegisters[REGISTER_COUNT];
     static MemoryRegister* memoryRegisters[REGISTER_COUNT];
 
@@ -34,7 +32,6 @@ private:
 
     void registers_init(int movementTimeout_ms);
     static void i2c_slave_isr(i2c_inst_t *i2c, i2c_slave_event_t event);
-    static bool movement_prune_callback(struct repeating_timer *t);
 
 public:
 

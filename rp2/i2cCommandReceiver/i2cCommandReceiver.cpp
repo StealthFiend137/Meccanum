@@ -11,9 +11,6 @@ I2cCommandReceiver::I2cCommandReceiver(i2c_inst_t* i2c, Chassis* chassis)
 {
     this->i2c_instance = i2c;
     I2cCommandReceiver::chassis_instance = chassis;
-
-    const int interval_ms = 20;
-    add_repeating_timer_ms(interval_ms, movement_prune_callback, NULL, &decay_timer);
 };
 
 void I2cCommandReceiver::Register_Change(uint8_t address, uint8_t value)
@@ -106,28 +103,6 @@ void I2cCommandReceiver::i2c_slave_isr(i2c_inst_t *i2c, i2c_slave_event_t event)
         default:
             break;
     }
-};
-
-bool I2cCommandReceiver::movement_prune_callback(struct repeating_timer *t)
-{
-    int ms_sinceBoot = to_ms_since_boot(get_absolute_time());
-
-    for(MemoryRegister* memRegister : memoryRegisters)
-    {
-        if(!memRegister->decayTimer || !memRegister->decayStarted)
-        {
-            continue;
-        };
-
-        if(ms_sinceBoot - memRegister->decayStartTimestamp > memRegister->decayPeriod_ms)
-        {
-            memRegister->value = 0;
-            memRegister->decayStarted = false;
-            memRegister->modified = true;
-        };
-    };
-
-    return true;
 };
 
 void I2cCommandReceiver::setup_command_receiver(uint sda_pin, uint scl_pin, uint baudrate, uint address, int movementTimeout_ms)
