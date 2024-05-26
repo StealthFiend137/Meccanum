@@ -7,11 +7,15 @@
 
 #define REGISTER_COUNT 13
 
+/// @brief Responsible for handling i2c communication and sending and receiving commands from the chassis.
 class I2cCommandReceiver
 {
 private:
 
+    /// @brief Backng field for the hardware i2c instance.
     i2c_inst_t* i2c_instance;
+
+    /// @brief Backing field for the chassis instance.
     Chassis* chassis_instance;
 
     struct repeating_timer decay_timer;
@@ -34,8 +38,7 @@ private:
 
 public:
 
-    //I2cCommandReceiver(i2c_inst_t* i2c, Chassis* chassis);
-
+    I2cCommandReceiver(i2c_inst_t* i2c, Chassis* chassis);
     void setup_command_receiver(uint sda_pin, uint scl_pin, uint baudrate, uint address, int movementTimeout_ms);
     uint8_t* GetModifiedRegisters(int* count);
     uint8_t GetRegisterValue(uint8_t address);

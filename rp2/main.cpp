@@ -24,7 +24,7 @@ static const uint I2C_SLAVE_ADDRESS = 0x17;
 static const uint I2C_SLAVE_BAUDRATE = 100000; // 100 kHz
 
 Chassis chassis(500);
-I2cCommandReceiver i2cCommandReceiver; //(I2C_SLAVE_PORT, &chassis);
+I2cCommandReceiver i2cCommandReceiver(I2C_SLAVE_PORT, &chassis);
 
 int movementIntervalStartTime = to_ms_since_boot(get_absolute_time());
 int modifiedRegisterCount;

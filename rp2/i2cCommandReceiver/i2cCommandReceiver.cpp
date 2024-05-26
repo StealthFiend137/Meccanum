@@ -120,14 +120,14 @@ bool I2cCommandReceiver::movement_prune_callback(struct repeating_timer *t)
     return true;
 };
 
-// I2cCommandReceiver::I2cCommandReceiver(i2c_inst_t* i2c, Chassis* chassis)
-// {
-//     i2c_instance = i2c;
-//     chassis_instance = chassis;
+I2cCommandReceiver::I2cCommandReceiver(i2c_inst_t* i2c, Chassis* chassis)
+{
+    i2c_instance = i2c;
+    chassis_instance = chassis;
 
-//     const int interval_ms = 20;
-//     add_repeating_timer_ms(interval_ms, movement_prune_callback, NULL, &decay_timer);
-// };
+    const int interval_ms = 20;
+    add_repeating_timer_ms(interval_ms, movement_prune_callback, NULL, &decay_timer);
+};
 
 void I2cCommandReceiver::setup_command_receiver(uint sda_pin, uint scl_pin, uint baudrate, uint address, int movementTimeout_ms)
 {
