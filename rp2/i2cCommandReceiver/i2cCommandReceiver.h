@@ -17,6 +17,7 @@ private:
 
     /// @brief 
     static inline Chassis* chassis_instance;
+    static inline I2cCommandReceiver* i2c_command_receiver_instance;
 
     static uint8_t modifiedRegisters[REGISTER_COUNT];
     static MemoryRegister* memoryRegisters[REGISTER_COUNT];

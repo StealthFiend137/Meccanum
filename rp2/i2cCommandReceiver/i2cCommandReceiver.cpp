@@ -11,6 +11,7 @@ I2cCommandReceiver::I2cCommandReceiver(i2c_inst_t* i2c, Chassis* chassis)
 {
     this->i2c_instance = i2c;
     I2cCommandReceiver::chassis_instance = chassis;
+    I2cCommandReceiver::i2c_command_receiver_instance = this;
 };
 
 void I2cCommandReceiver::command_receiver_init(uint sda_pin, uint scl_pin, uint baudrate, uint addresss)
