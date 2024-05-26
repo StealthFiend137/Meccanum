@@ -2,9 +2,7 @@
 #include <pico/time.h>
 
 #include "i2cCommandReceiver.h"
-#include "../registers.h"
-
-#define REGISTER_COUNT 16
+#include "registers.h"
 
 uint8_t I2cCommandReceiver::modifiedRegisters[REGISTER_COUNT];
 MemoryRegister* I2cCommandReceiver::memoryRegisters[REGISTER_COUNT];
@@ -52,23 +50,20 @@ void I2cCommandReceiver::registers_init(int movementTimeout_ms)
     Register_Initialize(CELL2, 3, false);
 
     // Movement Registers
-    Register_Initialize(XDIR0, 4, true, movementTimeout_ms);
-    Register_Initialize(XDIR1, 5, true, movementTimeout_ms);
-    Register_Initialize(YDIR0, 6, true, movementTimeout_ms);
-    Register_Initialize(YDIR1, 7, true, movementTimeout_ms);
-    Register_Initialize(WDIR0, 8, true, movementTimeout_ms);
-    Register_Initialize(WDIR1, 9, true, movementTimeout_ms);
+    Register_Initialize(XDIR, 4, true, movementTimeout_ms);
+    Register_Initialize(YDIR, 5, true, movementTimeout_ms);
+    Register_Initialize(WDIR, 6, true, movementTimeout_ms);
 
     // Sound Registers
-    Register_Initialize(SOUND, 10, true);
-    Register_Initialize(FREQ0, 11, true);
-    Register_Initialize(DUTY0, 12, true);
-    Register_Initialize(FREQ1, 13, true);
-    Register_Initialize(DUTY1, 14, true);
+    Register_Initialize(SOUND, 7, true);
+    Register_Initialize(FREQ0, 8, true);
+    Register_Initialize(DUTY0, 9, true);
+    Register_Initialize(FREQ1, 10, true);
+    Register_Initialize(DUTY1, 11, true);
 
     // Lighting Registers
-    Register_Initialize(LIGH0, 15, true);
-    Register_Initialize(LIGH1, 16, true);
+    Register_Initialize(LIGH0, 12, true);
+    Register_Initialize(LIGH1, 13, true);
 };
 
 void I2cCommandReceiver::i2c_slave_isr(i2c_inst_t *i2c, i2c_slave_event_t event)

@@ -5,7 +5,7 @@
 #include "memoryRegister.h"
 #include "../chassis/chassis.h"
 
-#define REGISTER_COUNT 16
+#define REGISTER_COUNT 13
 
 class I2cCommandReceiver
 {
