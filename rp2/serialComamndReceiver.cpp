@@ -42,7 +42,7 @@ public:
     {
     };
 
-    void setup_command_receiver(uint baud_rate, uint tx_pin, uint rx_pin, uint16_t movement_timeout_ms)
+    void command_receiver_init(uint baud_rate, uint tx_pin, uint rx_pin, uint16_t movement_timeout_ms)
     {
         // Set up our UART with a basic baud rate.
         uart_init(_uart_instance, 2400);

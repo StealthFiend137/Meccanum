@@ -31,7 +31,7 @@ private:
 public:
 
     I2cCommandReceiver(i2c_inst_t* i2c, Chassis* chassis);
-    void setup_command_receiver(uint sda_pin, uint scl_pin, uint baudrate, uint address, int movementTimeout_ms);
+    void command_receiver_init(uint sda_pin, uint scl_pin, uint baudrate, uint address);
     uint8_t* GetModifiedRegisters(int* count);
     uint8_t GetRegisterValue(uint8_t address);
 };

@@ -13,6 +13,20 @@ I2cCommandReceiver::I2cCommandReceiver(i2c_inst_t* i2c, Chassis* chassis)
     I2cCommandReceiver::chassis_instance = chassis;
 };
 
+void I2cCommandReceiver::command_receiver_init(uint sda_pin, uint scl_pin, uint baudrate, uint addresss)
+{
+    gpio_init(sda_pin);
+    gpio_pull_up(sda_pin);
+    gpio_set_function(sda_pin, GPIO_FUNC_I2C);
+
+    gpio_init(scl_pin);
+    gpio_pull_up(scl_pin);
+    gpio_set_function(scl_pin, GPIO_FUNC_I2C);
+    
+    i2c_init(i2c_instance, baudrate);
+    i2c_slave_init(i2c_instance, address, i2c_slave_isr);
+};
+
 void I2cCommandReceiver::Register_Change(uint8_t address, uint8_t value)
 {
     MemoryRegister *reg = memoryRegisters[address];
@@ -69,20 +83,6 @@ void I2cCommandReceiver::i2c_slave_isr(i2c_inst_t *i2c, i2c_slave_event_t event)
         default:
             break;
     }
-};
-
-void I2cCommandReceiver::setup_command_receiver(uint sda_pin, uint scl_pin, uint baudrate, uint address, int movementTimeout_ms)
-{
-    gpio_init(sda_pin);
-    gpio_pull_up(sda_pin);
-    gpio_set_function(sda_pin, GPIO_FUNC_I2C);
-
-    gpio_init(scl_pin);
-    gpio_pull_up(scl_pin);
-    gpio_set_function(scl_pin, GPIO_FUNC_I2C);
-    
-    i2c_init(i2c_instance, baudrate);
-    i2c_slave_init(i2c_instance, address, i2c_slave_isr);
 };
 
 uint8_t* I2cCommandReceiver::GetModifiedRegisters(int* count)
