@@ -38,40 +38,6 @@ uint8_t I2cCommandReceiver::Register_External_Read(uint8_t address)
     return memoryRegisters[address]->value;
 };
 
-void I2cCommandReceiver::Register_Initialize(uint8_t address, uint8_t value, bool externallyModifiable)
-{
-    memoryRegisters[address] = new MemoryRegister(address, value, externallyModifiable);
-};
-
-void I2cCommandReceiver::Register_Initialize(uint8_t address, uint8_t value, bool externallyModifiable, int decayTime_ms)
-{
-    memoryRegisters[address] = new MemoryRegister(address, value, externallyModifiable, decayTime_ms);
-};
-
-void I2cCommandReceiver::registers_init(int movementTimeout_ms)
-{
-    // Telemetry Registers
-    Register_Initialize(CELL0, 1, false);
-    Register_Initialize(CELL1, 2, false);
-    Register_Initialize(CELL2, 3, false);
-
-    // Movement Registers
-    Register_Initialize(XDIR, 4, true, movementTimeout_ms);
-    Register_Initialize(YDIR, 5, true, movementTimeout_ms);
-    Register_Initialize(WDIR, 6, true, movementTimeout_ms);
-
-    // Sound Registers
-    Register_Initialize(SOUND, 7, true);
-    Register_Initialize(FREQ0, 8, true);
-    Register_Initialize(DUTY0, 9, true);
-    Register_Initialize(FREQ1, 10, true);
-    Register_Initialize(DUTY1, 11, true);
-
-    // Lighting Registers
-    Register_Initialize(LIGH0, 12, true);
-    Register_Initialize(LIGH1, 13, true);
-};
-
 void I2cCommandReceiver::i2c_slave_isr(i2c_inst_t *i2c, i2c_slave_event_t event)
 {
     switch (event) {
@@ -107,8 +73,6 @@ void I2cCommandReceiver::i2c_slave_isr(i2c_inst_t *i2c, i2c_slave_event_t event)
 
 void I2cCommandReceiver::setup_command_receiver(uint sda_pin, uint scl_pin, uint baudrate, uint address, int movementTimeout_ms)
 {
-    registers_init(movementTimeout_ms);
-
     gpio_init(sda_pin);
     gpio_pull_up(sda_pin);
     gpio_set_function(sda_pin, GPIO_FUNC_I2C);

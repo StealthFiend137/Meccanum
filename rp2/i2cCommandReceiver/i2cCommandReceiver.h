@@ -26,11 +26,6 @@ private:
     
     static void Register_Change(uint8_t address, uint8_t value);
     static uint8_t Register_External_Read(uint8_t address);
-
-    static void Register_Initialize(uint8_t address, uint8_t value, bool externallyModifiable);
-    static void Register_Initialize(uint8_t address, uint8_t value, bool externallyModifiable, int decayTime_ms);
-
-    void registers_init(int movementTimeout_ms);
     static void i2c_slave_isr(i2c_inst_t *i2c, i2c_slave_event_t event);
 
 public:
