@@ -54,6 +54,14 @@ public:
 
 private:
 
+    /// @brief A repeating timer for ensuring the that non-perpetual chassis actions don't run away.
+    struct repeating_timer decay_timer;
+
+    /// @brief Callback fired when the decay time is reached.
+    /// @param t The repeating timer.
+    /// @return Returns a bool, to continue repeating. Always returns true.
+    static bool decay_callback(struct repeating_timer *t);
+
     /// @brief The x axis.
     MovementAxis xAxis;
 

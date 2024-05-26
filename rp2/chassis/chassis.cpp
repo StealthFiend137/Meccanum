@@ -1,12 +1,32 @@
 #include <pico/stdlib.h>
+#include <stdio.h>
 #include <algorithm>
+
 #include "chassis.h"
+#include "AxisState.h"
+
+struct status
+{
+    AxisState xAxis{0, 50};
+    AxisState yAxis{0, 50};
+    AxisState wAxis{0, 50};
+};
 
 /// @brief Creates a new instance of the Chassis class.
 /// @param comamnd_timeout_ms The timeout in ms before items return to their default state.
 Chassis::Chassis(const uint comamnd_timeout_ms)
 {
     this->_command_timeout_ms = comamnd_timeout_ms;
+
+    const int interval_ms = 2000;
+    add_repeating_timer_ms(interval_ms, decay_callback, NULL, &decay_timer);
+};
+
+bool Chassis::decay_callback(struct repeating_timer *t)
+{
+    int ms_sinceBoot = to_ms_since_boot(get_absolute_time());
+    printf("decay timer\n");
+    return true;
 };
 
 /// @brief Sets all of the movement axes simultaneously.
