@@ -5,11 +5,11 @@
 #include "chassis.h"
 #include "AxisState.h"
 
-struct status
+struct AxesStatus
 {
-    AxisState xAxis{0, 50};
-    AxisState yAxis{0, 50};
-    AxisState wAxis{0, 50};
+    AxisState xAxis{0, 5000};
+    AxisState yAxis{0, 5000};
+    AxisState wAxis{0, 5000};
 };
 
 /// @brief Creates a new instance of the Chassis class.
@@ -24,9 +24,27 @@ Chassis::Chassis(const uint comamnd_timeout_ms)
 
 bool Chassis::decay_callback(struct repeating_timer *t)
 {
-    int ms_sinceBoot = to_ms_since_boot(get_absolute_time());
     printf("decay timer\n");
+
+    int ms_since_boot = to_ms_since_boot(get_absolute_time());
+    //get_changed_axes(ms_since_boot);
+
     return true;
+};
+
+void Chassis::get_changed_axes(int current_time)
+{
+    Modified newModified;
+
+    // if(_axes_status.xAxis.has_decayed(current_time)) newModified = static_cast<Modified>(newModified | xAxisModified);
+    // if(_axes_status.yAxis.has_decayed(current_time)) newModified = static_cast<Modified>(newModified | yAxisModified);
+    // if(_axes_status.wAxis.has_decayed(current_time)) newModified = static_cast<Modified>(newModified | wAxisModified);
+
+    if(0 == newModified) return;
+
+    // std::for_each(this->_modificationCallbacks.begin(), this->_modificationCallbacks.end(), [modifiedAxis](void (*callback)(Modified)) {
+    //     callback(modifiedAxis);
+    // });
 };
 
 /// @brief Sets all of the movement axes simultaneously.

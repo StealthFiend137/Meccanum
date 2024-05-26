@@ -54,6 +54,8 @@ public:
 
 private:
 
+    Modified modified;
+
     /// @brief A repeating timer for ensuring the that non-perpetual chassis actions don't run away.
     struct repeating_timer decay_timer;
 
@@ -94,4 +96,7 @@ private:
     /// @param MovementAxis The axis to get the speed of.
     /// @return Returns the speed of the provided axis.
     int get_axis(MovementAxis* MovementAxis);
+
+
+    void get_changed_axes(int current_time);
 };
