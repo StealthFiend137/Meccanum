@@ -1,5 +1,7 @@
 #pragma once
 
+#define REGISTER_COUNT 13
+
 // Telemetry Registers
 #define CELL0 0x00
 #define CELL1 0x01

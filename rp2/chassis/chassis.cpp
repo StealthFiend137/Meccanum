@@ -24,7 +24,7 @@ Chassis::Chassis(const uint comamnd_timeout_ms)
 
 bool Chassis::decay_callback(struct repeating_timer *t)
 {
-    printf("decay timer\n");
+    printf("decay timer. ");
 
     int ms_since_boot = to_ms_since_boot(get_absolute_time());
     //get_changed_axes(ms_since_boot);
