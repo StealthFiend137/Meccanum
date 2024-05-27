@@ -71,7 +71,10 @@ void I2cCommandReceiver::i2c_slave_isr(i2c_inst_t *i2c, i2c_slave_event_t event)
             break;
 
         case I2C_SLAVE_REQUEST: // master is requesting data
-            //i2c_write_byte_raw(i2c, Register_External_Read(address));
+        
+            uint8_t read_address;
+            read_address = I2cCommandReceiver::i2c_buffer.get_next_read_address();
+            i2c_write_byte_raw(i2c, read_address);
             break;
 
         case I2C_SLAVE_FINISH: // master has signalled Stop / Restart

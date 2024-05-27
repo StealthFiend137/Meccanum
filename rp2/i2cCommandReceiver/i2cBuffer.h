@@ -21,4 +21,5 @@ public:
     
     uint8_t get_start_address();
     uint8_t* get_written_bytes(uint8_t* bytes_written);
+    uint8_t get_next_read_address();
 };
