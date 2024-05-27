@@ -46,26 +46,9 @@ void indicate_status(int ms_since_boot)
 void action_movement(int ms_since_boot)
 {
     int elapsed_time = ms_since_boot - movementIntervalStartTime; 
-    if(elapsed_time < 10)
-    {
-        return;
-    }
+    if(elapsed_time < 10) return;
 
     movementIntervalStartTime = ms_since_boot;
-
-    // auto modifiedRegisters = i2cCommandReceiver.GetModifiedRegisters(&modifiedRegisterCount);
-    // if(0 == modifiedRegisterCount)
-    // {
-    //     return;
-    // }
-
-    // printf("%d registers modified.\n", modifiedRegisterCount);
-    // for(int i = 0; i < modifiedRegisterCount; i++)
-    // {
-    //     uint8_t registerAddress = modifiedRegisters[i];
-    //     uint8_t registerValue = i2cCommandReceiver.GetRegisterValue(registerAddress);
-    //     printf("register %x value changed to %x.\n", registerAddress, registerValue);
-    // }
 };
 
 int main()

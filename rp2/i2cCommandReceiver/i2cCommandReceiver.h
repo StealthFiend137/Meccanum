@@ -13,27 +13,20 @@ class I2cCommandReceiver
 private:
 
     /// @brief Backng field for the hardware i2c instance.
-    i2c_inst_t* i2c_instance;
+    i2c_inst_t* _i2c_instance;
+    Chassis* _chassis;
 
     /// @brief 
-    static inline Chassis* chassis_instance;
-    static inline I2cCommandReceiver* i2c_command_receiver_instance;
-
+    static inline I2cCommandReceiver* _instance;
     static inline I2cBuffer i2c_buffer;
 
-    static uint8_t modifiedRegisters[REGISTER_COUNT];
-    static MemoryRegister* memoryRegisters[REGISTER_COUNT];
-    
-    static void Register_Change(uint8_t address, uint8_t value);
-    static uint8_t Register_External_Read(uint8_t address);
     static void i2c_slave_isr(i2c_inst_t *i2c, i2c_slave_event_t event);
 
     static void debug_buffer();
+    void commit_buffer();
 
 public:
 
     I2cCommandReceiver(i2c_inst_t* i2c, Chassis* chassis);
     void command_receiver_init(uint sda_pin, uint scl_pin, uint baudrate, uint8_t slave_address);
-    uint8_t* GetModifiedRegisters(int* count);
-    uint8_t GetRegisterValue(uint8_t address);
 };

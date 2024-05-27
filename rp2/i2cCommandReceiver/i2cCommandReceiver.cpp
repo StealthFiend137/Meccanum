@@ -7,9 +7,9 @@
 
 I2cCommandReceiver::I2cCommandReceiver(i2c_inst_t* i2c, Chassis* chassis)
 {
-    this->i2c_instance = i2c;
-    I2cCommandReceiver::chassis_instance = chassis;
-    I2cCommandReceiver::i2c_command_receiver_instance = this;
+    this->_i2c_instance = i2c;
+    this->_chassis = chassis;
+    I2cCommandReceiver::_instance = this;
 };
 
 void I2cCommandReceiver::command_receiver_init(uint sda_pin, uint scl_pin, uint baudrate, uint8_t slave_address)
@@ -22,35 +22,8 @@ void I2cCommandReceiver::command_receiver_init(uint sda_pin, uint scl_pin, uint 
     gpio_pull_up(scl_pin);
     gpio_set_function(scl_pin, GPIO_FUNC_I2C);
     
-    i2c_init(i2c_instance, baudrate);
-    i2c_slave_init(i2c_instance, slave_address, i2c_slave_isr);
-};
-
-
-
-void I2cCommandReceiver::Register_Change(uint8_t address, uint8_t value)
-{
-    MemoryRegister *reg = memoryRegisters[address];
-
-    if(!reg->externallyModifiable) 
-    {
-        return;
-    }
-
-    reg->value = value;
-
-    if(reg->decayTimer)
-    {
-        reg->decayStartTimestamp = to_ms_since_boot(get_absolute_time());
-        reg->decayStarted = true;
-    };
-
-    reg->modified = true;
-};
-
-uint8_t I2cCommandReceiver::Register_External_Read(uint8_t address)
-{
-    return memoryRegisters[address]->value;
+    i2c_init(_i2c_instance, baudrate);
+    i2c_slave_init(_i2c_instance, slave_address, i2c_slave_isr);
 };
 
 void I2cCommandReceiver::i2c_slave_isr(i2c_inst_t *i2c, i2c_slave_event_t event)
@@ -79,12 +52,17 @@ void I2cCommandReceiver::i2c_slave_isr(i2c_inst_t *i2c, i2c_slave_event_t event)
 
         case I2C_SLAVE_FINISH: // master has signalled Stop / Restart
             I2cCommandReceiver::i2c_buffer.end_message();
-            debug_buffer();
+            I2cCommandReceiver::_instance->commit_buffer();
             break;
 
         default:
             break;
     }
+};
+
+void I2cCommandReceiver::commit_buffer()
+{
+    this->debug_buffer();
 };
 
 void I2cCommandReceiver::debug_buffer()
@@ -99,27 +77,4 @@ void I2cCommandReceiver::debug_buffer()
         printf("Register: ??.  Value: %d\n", buffer[i]);
     }
     printf("\n\n");
-};
-
-uint8_t* I2cCommandReceiver::GetModifiedRegisters(int* count)
-{
-    int modifiedRegisterCount = 0;
-    
-    for(MemoryRegister* memRegister : memoryRegisters)
-    {
-        if(memRegister->modified)
-        {
-            modifiedRegisters[modifiedRegisterCount] = memRegister->address;
-            modifiedRegisterCount++;
-        }
-    }
-
-    *count = modifiedRegisterCount;
-    return modifiedRegisters;
-};
-
-uint8_t I2cCommandReceiver::GetRegisterValue(uint8_t address)
-{
-    memoryRegisters[address]->modified = false;
-    return memoryRegisters[address]->value;
 };
