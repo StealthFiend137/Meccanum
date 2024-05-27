@@ -1,7 +1,9 @@
 #include "i2cBuffer.h"
+#include <cstdio>
 
 void I2cBuffer::begin_message(uint8_t register_address)
 {
+    printf("Begin message\n");
     this->_start_address = register_address;
     this->_address_written = true;
     this->_bytes_written = 0;
@@ -9,6 +11,7 @@ void I2cBuffer::begin_message(uint8_t register_address)
 
 void I2cBuffer::end_message()
 {
+    printf("End message\n");
     this->_address_written = false;
 };
 
@@ -20,7 +23,7 @@ void I2cBuffer::add_data(uint8_t _data)
 
 bool I2cBuffer::is_open()
 {
-    return this->_address_written = true;
+    return true == this->_address_written;
 };
 
 uint8_t I2cBuffer::get_start_address()

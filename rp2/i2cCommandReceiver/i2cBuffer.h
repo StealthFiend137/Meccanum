@@ -6,7 +6,7 @@ class I2cBuffer
 {
 private:
 
-    uint8_t _start_address = 0;
+    uint8_t _start_address;
     bool _address_written = false;
 
     uint8_t _data[REGISTER_COUNT];
