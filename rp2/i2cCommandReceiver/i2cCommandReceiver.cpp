@@ -31,27 +31,27 @@ void I2cCommandReceiver::i2c_slave_isr(i2c_inst_t *i2c, i2c_slave_event_t event)
     switch (event)
     {
         case I2C_SLAVE_RECEIVE: // master has initiated a connection
-            if(!I2cCommandReceiver::i2c_buffer.is_open()) // reads and writes always start with the memory address
+            if(!I2cCommandReceiver::_instance->_i2c_buffer.is_open()) // reads and writes always start with the memory address
             {
                 uint8_t address = i2c_read_byte_raw(i2c);
-                I2cCommandReceiver::i2c_buffer.begin_message(address);
+                I2cCommandReceiver::_instance->_i2c_buffer.begin_message(address);
             }
             else // master is writing data
             {
                 uint8_t data = i2c_read_byte_raw(i2c);
-                I2cCommandReceiver::i2c_buffer.add_data(data);
+                I2cCommandReceiver::_instance->_i2c_buffer.add_data(data);
             }
             break;
 
         case I2C_SLAVE_REQUEST: // master is requesting data
         
             uint8_t read_address;
-            read_address = I2cCommandReceiver::i2c_buffer.get_next_read_address();
+            read_address = I2cCommandReceiver::_instance->_i2c_buffer.get_next_read_address();
             i2c_write_byte_raw(i2c, read_address);
             break;
 
         case I2C_SLAVE_FINISH: // master has signalled Stop / Restart
-            I2cCommandReceiver::i2c_buffer.end_message();
+            I2cCommandReceiver::_instance->_i2c_buffer.end_message();
             I2cCommandReceiver::_instance->commit_buffer();
             break;
 
@@ -62,16 +62,19 @@ void I2cCommandReceiver::i2c_slave_isr(i2c_inst_t *i2c, i2c_slave_event_t event)
 
 void I2cCommandReceiver::commit_buffer()
 {
-    this->debug_buffer();
+    auto xAxis = this->_chassis->get_x_axis();
+    auto yAxis = this->_chassis->get_y_axis();
+    auto wAxis = this->_chassis->get_w_axis();
+    this->_chassis->set_all_axes(xAxis, yAxis, wAxis);
 };
 
 void I2cCommandReceiver::debug_buffer()
 {
     printf("\n\n");
     uint8_t bytes_written;
-    uint8_t* buffer = I2cCommandReceiver::i2c_buffer.get_written_bytes(&bytes_written);
+    uint8_t* buffer = I2cCommandReceiver::_instance->_i2c_buffer.get_written_bytes(&bytes_written);
 
-    printf("%d Bytes written, starting at address: %d\n", bytes_written, I2cCommandReceiver::i2c_buffer.get_start_address());
+    printf("%d Bytes written, starting at address: %d\n", bytes_written, I2cCommandReceiver::_instance->_i2c_buffer.get_start_address());
     for(int i = 0; i < bytes_written; i++)
     {
         printf("Register: ??.  Value: %d\n", buffer[i]);

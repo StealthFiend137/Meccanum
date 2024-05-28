@@ -58,6 +58,8 @@ int main()
     
     i2cCommandReceiver.command_receiver_init(I2C_SLAVE_SDA_PIN, I2C_SLAVE_SCL_PIN, I2C_SLAVE_BAUDRATE, I2C_SLAVE_ADDRESS);
 
+    printf("\n==========================\nReady\n==========================\n");
+
     while(true)
     {
         auto ms_since_boot = to_ms_since_boot(get_absolute_time());

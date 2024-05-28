@@ -1,9 +1,10 @@
 #include <pico/stdlib.h>
-#include <stdio.h>
 #include <algorithm>
 
 #include "chassis.h"
 #include "axisState.h"
+
+#include <cstdio>
 
 struct AxesStatus
 {
@@ -24,9 +25,8 @@ Chassis::Chassis(const uint comamnd_timeout_ms)
 
 bool Chassis::decay_callback(struct repeating_timer *t)
 {
-    printf("decay timer. ");
-
     int ms_since_boot = to_ms_since_boot(get_absolute_time());
+    printf("decay timer.%d\n", ms_since_boot);
     //get_changed_axes(ms_since_boot);
 
     return true;
@@ -35,6 +35,7 @@ bool Chassis::decay_callback(struct repeating_timer *t)
 void Chassis::get_changed_axes(int current_time)
 {
     Modified newModified;
+    
 
     // if(_axes_status.xAxis.has_decayed(current_time)) newModified = static_cast<Modified>(newModified | xAxisModified);
     // if(_axes_status.yAxis.has_decayed(current_time)) newModified = static_cast<Modified>(newModified | yAxisModified);
@@ -51,12 +52,13 @@ void Chassis::get_changed_axes(int current_time)
 /// @param xVelocity The value of the x axis.
 /// @param yVelocity The value of the y axis.
 /// @param wVelocity The value of the w axis.
-void Chassis::set_all_axis(int xVelocity, int yVelocity, int wVelocity)
+void Chassis::set_all_axes(int xVelocity, int yVelocity, int wVelocity)
 {
     int modified_time = to_ms_since_boot(get_absolute_time());
     set_axis(xVelocity, &xAxis, xAxisModified, modified_time);
     set_axis(yVelocity, &yAxis, yAxisModified, modified_time);
     set_axis(wVelocity, &wAxis, wAxisModified, modified_time);
+    printf("All axes set x%d, y%d, w%d\n", xVelocity, yVelocity, wVelocity);
 };
 
 /// @brief Sets the value of the x axis.

@@ -1,5 +1,8 @@
 #include "i2cBuffer.h"
 #include <algorithm>
+#include <map>
+
+#include <cstdio>
 
 void I2cBuffer::begin_message(uint8_t register_address)
 {
@@ -15,6 +18,16 @@ void I2cBuffer::end_message()
 
 void I2cBuffer::add_data(uint8_t _data)
 {
+    std::map<uint8_t, ModifiedRegisters> registerMap;
+    registerMap[WDIR] = ModifiedRegisters::wAxisModified;
+    registerMap[XDIR] = ModifiedRegisters::xAxisModified;
+    registerMap[YDIR] = ModifiedRegisters::yAxisModified;
+    
+    uint8_t addressBeingWritten = this->_start_address + this->_bytes_written;
+    addressBeingWritten %= REGISTER_COUNT;
+
+    this->_modified_registers = this->_modified_registers | registerMap[addressBeingWritten];
+
     this->_data[this->_bytes_written] = _data;
     this->_bytes_written++;
 };

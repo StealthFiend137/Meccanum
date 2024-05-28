@@ -8,9 +8,9 @@
 #define CELL2 0x02
 
 // Movement Registers
-#define XDIR 0x03
-#define YDIR 0x04
-#define WDIR 0x05
+#define WDIR 0x03
+#define XDIR 0x04
+#define YDIR 0x05
 
 // Sound Registers
 #define SOUND 0x06

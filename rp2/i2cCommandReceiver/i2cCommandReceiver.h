@@ -12,17 +12,15 @@ class I2cCommandReceiver
 {
 private:
 
+    static inline I2cCommandReceiver* _instance;
+    static void i2c_slave_isr(i2c_inst_t *i2c, i2c_slave_event_t event);
+
     /// @brief Backng field for the hardware i2c instance.
     i2c_inst_t* _i2c_instance;
     Chassis* _chassis;
+    I2cBuffer _i2c_buffer;
 
-    /// @brief 
-    static inline I2cCommandReceiver* _instance;
-    static inline I2cBuffer i2c_buffer;
-
-    static void i2c_slave_isr(i2c_inst_t *i2c, i2c_slave_event_t event);
-
-    static void debug_buffer();
+    void debug_buffer();
     void commit_buffer();
 
 public:

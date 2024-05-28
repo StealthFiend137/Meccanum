@@ -8,9 +8,9 @@ CELL1 = 0x01
 CELL2 = 0x02
 
 # Movement Registers
-XDIR = 0x03
-YDIR = 0x04
-WDIR = 0X05
+WDIR = 0x03
+XDIR = 0x04
+YDIR = 0X05
 
 # Sound Registers
 SOUND = 0x06
@@ -37,8 +37,8 @@ chassis_address = 0x17;
 #b = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19] # there are 19
 #bus.write_i2c_block_data(chassis_address, 0x00, b)
 
-xUpdate = [1, 1]
-bus.write_i2c_block_data(chassis_address, XDIR, xUpdate)
+xUpdate = [127, 201, 255]
+bus.write_i2c_block_data(chassis_address, WDIR, xUpdate)
 
 #time.sleep(0.01)
 #adr = bus.read_i2c_block_data(chassis_address, DUTY0, 20)

@@ -14,7 +14,7 @@ public:
     /// @param xVelocity The value of the x axis.
     /// @param yVelocity The value of the y axis.
     /// @param wVelocity The value of the w axis.
-    void set_all_axis(int xVelocity, int yVelocity, int wVelocity);
+    void set_all_axes(int xVelocity, int yVelocity, int wVelocity);
 
     /// @brief Sets the speed of the axis.
     /// @param speed The requested speed of the axis.
