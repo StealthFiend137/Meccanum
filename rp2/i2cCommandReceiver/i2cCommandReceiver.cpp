@@ -1,4 +1,3 @@
-#include <cstdio>
 #include <hardware/gpio.h>
 #include <pico/time.h>
 

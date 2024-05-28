@@ -1,5 +1,5 @@
-#include "i2cBuffer.h"
 #include <algorithm>
+#include "i2cBuffer.h"
 
 I2cBuffer::I2cBuffer()
 {

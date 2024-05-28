@@ -1,10 +1,9 @@
 #include <pico/stdlib.h>
 #include <algorithm>
+#include <cstdio>
 
 #include "chassis.h"
 #include "axisState.h"
-
-#include <cstdio>
 
 struct AxesStatus
 {
@@ -58,7 +57,6 @@ void Chassis::set_all_axes(int xVelocity, int yVelocity, int wVelocity)
     set_axis(xVelocity, &xAxis, xAxisModified, modified_time);
     set_axis(yVelocity, &yAxis, yAxisModified, modified_time);
     set_axis(wVelocity, &wAxis, wAxisModified, modified_time);
-    printf("All axes set x%d, y%d, w%d\n", xVelocity, yVelocity, wVelocity);
 };
 
 /// @brief Sets the value of the w axis.
@@ -68,7 +66,6 @@ void Chassis::set_w_axis(int velocity)
     Modified modifiedAxis = wAxisModified;
     AxisState* axis = &wAxis;
     set_axis(velocity, axis, modifiedAxis);
-    printf("w axis set %d\n", velocity);
 };
 
 /// @brief Gets the value of the w axis.c++ 
@@ -85,7 +82,6 @@ void Chassis::set_x_axis(int velocity)
     Modified modifiedAxis = xAxisModified;
     AxisState* axis = &xAxis;
     set_axis(velocity, axis, modifiedAxis);
-    printf("x axis set %d\n", velocity);
 };
 
 /// @brief Gets the value of the x axis.
@@ -102,7 +98,6 @@ void Chassis::set_y_axis(int velocity)
     Modified modifiedAxis = yAxisModified;
     AxisState* axis = &yAxis;
     set_axis(velocity, axis, modifiedAxis);
-    printf("y axis set %d\n", velocity);
 };
 
 /// @brief Gets the value of the y axis.

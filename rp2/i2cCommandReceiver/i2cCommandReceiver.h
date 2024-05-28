@@ -2,8 +2,6 @@
 #include <hardware/i2c.h>
 #include <pico/i2c_slave.h>
 
-#include "memoryRegister.h"
-#include "registers.h"
 #include "i2cBuffer.h"
 #include "../chassis/chassis.h"
 
