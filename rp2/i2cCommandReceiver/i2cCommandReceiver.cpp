@@ -36,7 +36,8 @@ void I2cCommandReceiver::i2c_slave_isr(i2c_inst_t *i2c, i2c_slave_event_t event)
                 uint8_t address = i2c_read_byte_raw(i2c);
                 I2cCommandReceiver::_instance->_i2c_buffer.begin_message(address);
             }
-            else // master is writing data
+       
+     else // master is writing data
             {
                 uint8_t data = i2c_read_byte_raw(i2c);
                 I2cCommandReceiver::_instance->_i2c_buffer.add_data(data);
@@ -60,24 +61,55 @@ void I2cCommandReceiver::i2c_slave_isr(i2c_inst_t *i2c, i2c_slave_event_t event)
     }
 };
 
-void I2cCommandReceiver::commit_buffer()
+bool I2cCommandReceiver::get_if_register_modified(I2cBuffer::ModifiedRegisters effectedRegister)
 {
-    auto xAxis = this->_chassis->get_x_axis();
-    auto yAxis = this->_chassis->get_y_axis();
-    auto wAxis = this->_chassis->get_w_axis();
-    this->_chassis->set_all_axes(xAxis, yAxis, wAxis);
+    return effectedRegister == (this->_i2c_buffer._modified_registers & effectedRegister);
 };
 
-void I2cCommandReceiver::debug_buffer()
+uint8_t GetValueByAddress(uint8_t address, uint8_t* addresses, uint8_t* data) 
 {
-    printf("\n\n");
-    uint8_t bytes_written;
-    uint8_t* buffer = I2cCommandReceiver::_instance->_i2c_buffer.get_written_bytes(&bytes_written);
-
-    printf("%d Bytes written, starting at address: %d\n", bytes_written, I2cCommandReceiver::_instance->_i2c_buffer.get_start_address());
-    for(int i = 0; i < bytes_written; i++)
+    for(int i = 0; i<REGISTER_COUNT; i++)
     {
-        printf("Register: ??.  Value: %d\n", buffer[i]);
+        if(addresses[i] == address)
+        {
+            return data[i];
+        };
     }
-    printf("\n\n");
+
+    return 0;
+};
+
+void I2cCommandReceiver::commit_buffer()
+{
+    bool wAxisModified = this->get_if_register_modified(I2cBuffer::ModifiedRegisters::wAxisModified);
+    bool xAxisModified = this->get_if_register_modified(I2cBuffer::ModifiedRegisters::xAxisModified);
+    bool yAxisModified = this->get_if_register_modified(I2cBuffer::ModifiedRegisters::yAxisModified);
+    bool allAxisModifed = wAxisModified & xAxisModified & yAxisModified;
+
+    if(allAxisModifed)
+    {
+        auto wAxisValue = (int)GetValueByAddress(WDIR, this->_i2c_buffer._addresses, this->_i2c_buffer._data);
+        auto xAxisValue = (int)GetValueByAddress(XDIR, this->_i2c_buffer._addresses, this->_i2c_buffer._data);
+        auto yAxisValue = (int)GetValueByAddress(YDIR, this->_i2c_buffer._addresses, this->_i2c_buffer._data);
+        this->_chassis->set_all_axes(wAxisValue, xAxisValue, yAxisValue);
+        return;
+    }
+
+    if(wAxisModified)
+    {
+        auto wAxisValue = (int)GetValueByAddress(WDIR, this->_i2c_buffer._addresses, this->_i2c_buffer._data);
+        this->_chassis->set_w_axis(wAxisValue);
+    }
+
+    if(xAxisModified)
+    {
+        auto xAxisValue = (int)GetValueByAddress(XDIR, this->_i2c_buffer._addresses, this->_i2c_buffer._data);
+        this->_chassis->set_x_axis(xAxisValue);
+    }
+
+    if(yAxisModified)
+    {
+        auto yAxisValue = (int)GetValueByAddress(YDIR, this->_i2c_buffer._addresses, this->_i2c_buffer._data);
+        this->_chassis->set_y_axis(yAxisModified);
+    }
 };

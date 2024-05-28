@@ -61,6 +61,23 @@ void Chassis::set_all_axes(int xVelocity, int yVelocity, int wVelocity)
     printf("All axes set x%d, y%d, w%d\n", xVelocity, yVelocity, wVelocity);
 };
 
+/// @brief Sets the value of the w axis.
+/// @param velocity The value of the w axis.
+void Chassis::set_w_axis(int velocity)
+{
+    Modified modifiedAxis = wAxisModified;
+    AxisState* axis = &wAxis;
+    set_axis(velocity, axis, modifiedAxis);
+    printf("w axis set %d\n", velocity);
+};
+
+/// @brief Gets the value of the w axis.c++ 
+/// @return Returns the value of the w axis.
+int Chassis::get_w_axis()
+{
+    return get_axis(&wAxis);
+};
+
 /// @brief Sets the value of the x axis.
 /// @param velocity The value of the x axis.
 void Chassis::set_x_axis(int velocity)
@@ -68,6 +85,7 @@ void Chassis::set_x_axis(int velocity)
     Modified modifiedAxis = xAxisModified;
     AxisState* axis = &xAxis;
     set_axis(velocity, axis, modifiedAxis);
+    printf("x axis set %d\n", velocity);
 };
 
 /// @brief Gets the value of the x axis.
@@ -84,6 +102,7 @@ void Chassis::set_y_axis(int velocity)
     Modified modifiedAxis = yAxisModified;
     AxisState* axis = &yAxis;
     set_axis(velocity, axis, modifiedAxis);
+    printf("y axis set %d\n", velocity);
 };
 
 /// @brief Gets the value of the y axis.
@@ -91,22 +110,6 @@ void Chassis::set_y_axis(int velocity)
 int Chassis::get_y_axis()
 {
     return get_axis(&yAxis);
-};
-
-/// @brief Sets the value of the w axis.
-/// @param velocity The value of the w axis.
-void Chassis::set_w_axis(int velocity)
-{
-    Modified modifiedAxis = wAxisModified;
-    AxisState* axis = &wAxis;
-    set_axis(velocity, axis, modifiedAxis);
-};
-
-/// @brief Gets the value of the w axis.c++ 
-/// @return Returns the value of the w axis.
-int Chassis::get_w_axis()
-{
-    return get_axis(&wAxis);
 };
 
 // void Chassis::register_callback(void (*callback)(Modified))

@@ -23,6 +23,8 @@ private:
     void debug_buffer();
     void commit_buffer();
 
+    bool get_if_register_modified(I2cBuffer::ModifiedRegisters effectedRegister);
+
 public:
 
     I2cCommandReceiver(i2c_inst_t* i2c, Chassis* chassis);

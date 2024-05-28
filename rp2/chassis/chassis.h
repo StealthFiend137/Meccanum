@@ -18,6 +18,14 @@ public:
 
     /// @brief Sets the speed of the axis.
     /// @param speed The requested speed of the axis.
+    void set_w_axis(int speed);
+
+    /// @brief Gets the speed of the axis.
+    /// @return Returns theMovementAxis speed of the axis. 
+    int get_w_axis();
+
+    /// @brief Sets the speed of the axis.
+    /// @param speed The requested speed of the axis.
     void set_x_axis(int speed);
 
     /// @brief Gets the speed of the axis.
@@ -31,14 +39,6 @@ public:
     /// @brief Gets the speed of the axis.
     /// @return Returns the speed of the axis. 
     int get_y_axis();
-
-    /// @brief Sets the speed of the axis.
-    /// @param speed The requested speed of the axis.
-    void set_w_axis(int speed);
-
-    /// @brief Gets the speed of the axis.
-    /// @return Returns theMovementAxis speed of the axis. 
-    int get_w_axis();
 
     /// @brief 
     enum Modified
