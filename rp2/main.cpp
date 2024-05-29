@@ -62,17 +62,20 @@ void action_movement(int ms_since_boot)
 
     if((_modified & Chassis::Modified::wAxisModified) == Chassis::Modified::wAxisModified)
     {
-        printf("w Axis Modified\n");
+        int velocity = chassis.get_w_axis();
+        printf("w Axis Modified to %d\n", velocity);
     }
 
     if((_modified & Chassis::Modified::xAxisModified) == Chassis::Modified::xAxisModified)
     {
-        printf("x Axis Modified\n");
+        int velocity = chassis.get_x_axis();
+        printf("x Axis Modified to %d\n", velocity);
     }
 
     if((_modified & Chassis::Modified::yAxisModified) == Chassis::Modified::yAxisModified)
     {
-        printf("y Axis Modified\n");
+        int velocity = chassis.get_y_axis();
+        printf("y Axis Modified to %d\n", velocity);
     }
 
     _modified = Chassis::Modified::none;

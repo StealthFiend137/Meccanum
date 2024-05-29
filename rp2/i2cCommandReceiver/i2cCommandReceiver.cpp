@@ -51,7 +51,7 @@ void I2cCommandReceiver::i2c_slave_isr(i2c_inst_t *i2c, i2c_slave_event_t event)
                 I2cCommandReceiver::_instance->_i2c_buffer.begin_message(address);
             }
        
-     else // master is writing data
+            else // master is writing data
             {
                 uint8_t data = i2c_read_byte_raw(i2c);
                 I2cCommandReceiver::_instance->_i2c_buffer.add_data(data);
@@ -102,28 +102,28 @@ void I2cCommandReceiver::commit_buffer()
 
     if(allAxisModifed)
     {
-        auto wAxisValue = (int)GetValueByAddress(WDIR, this->_i2c_buffer._addresses, this->_i2c_buffer._data);
-        auto xAxisValue = (int)GetValueByAddress(XDIR, this->_i2c_buffer._addresses, this->_i2c_buffer._data);
-        auto yAxisValue = (int)GetValueByAddress(YDIR, this->_i2c_buffer._addresses, this->_i2c_buffer._data);
+        auto wAxisValue = (int8_t)GetValueByAddress(WDIR, this->_i2c_buffer._addresses, this->_i2c_buffer._data);
+        auto xAxisValue = (int8_t)GetValueByAddress(XDIR, this->_i2c_buffer._addresses, this->_i2c_buffer._data);
+        auto yAxisValue = (int8_t)GetValueByAddress(YDIR, this->_i2c_buffer._addresses, this->_i2c_buffer._data);
         this->_chassis->set_all_axes(wAxisValue, xAxisValue, yAxisValue);
         return;
     }
 
     if(wAxisModified)
     {
-        auto wAxisValue = (int)GetValueByAddress(WDIR, this->_i2c_buffer._addresses, this->_i2c_buffer._data);
+        auto wAxisValue = (int8_t)GetValueByAddress(WDIR, this->_i2c_buffer._addresses, this->_i2c_buffer._data);
         this->_chassis->set_w_axis(wAxisValue);
     }
 
     if(xAxisModified)
     {
-        auto xAxisValue = (int)GetValueByAddress(XDIR, this->_i2c_buffer._addresses, this->_i2c_buffer._data);
+        auto xAxisValue = (int8_t)GetValueByAddress(XDIR, this->_i2c_buffer._addresses, this->_i2c_buffer._data);
         this->_chassis->set_x_axis(xAxisValue);
     }
 
     if(yAxisModified)
     {
-        auto yAxisValue = (int)GetValueByAddress(YDIR, this->_i2c_buffer._addresses, this->_i2c_buffer._data);
+        auto yAxisValue = (int8_t)GetValueByAddress(YDIR, this->_i2c_buffer._addresses, this->_i2c_buffer._data);
         this->_chassis->set_y_axis(yAxisModified);
     }
 };

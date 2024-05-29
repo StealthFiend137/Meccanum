@@ -25,34 +25,19 @@ Chassis::Chassis(const uint comamnd_timeout_ms)
 bool Chassis::decay_callback(struct repeating_timer *t)
 {
     int ms_since_boot = to_ms_since_boot(get_absolute_time());
-    printf("decay timer.%d\n", ms_since_boot);
-    //get_changed_axes(ms_since_boot);
-
     return true;
-};
-
-void Chassis::get_changed_axes(int current_time)
-{
-    Modified newModified;
-
-    // if(_axes_status.xAxis.has_decayed(current_time)) newModified = static_cast<Modified>(newModified | xAxisModified);
-    // if(_axes_status.yAxis.has_decayed(current_time)) newModified = static_cast<Modified>(newModified | yAxisModified);
-    // if(_axes_status.wAxis.has_decayed(current_time)) newModified = static_cast<Modified>(newModified | wAxisModified);
-
-    if(Modified::none == newModified) return;
 };
 
 /// @brief Sets all of the movement axes simultaneously.
 /// @param xVelocity The value of the x axis.
 /// @param yVelocity The value of the y axis.
 /// @param wVelocity The value of the w axis.
-void Chassis::set_all_axes(int xVelocity, int yVelocity, int wVelocity)
+void Chassis::set_all_axes(int wVelocity, int xVelocity, int yVelocity)
 {
     int modified_time = to_ms_since_boot(get_absolute_time());
+    set_axis(wVelocity, &wAxis, Modified::wAxisModified, modified_time);
     set_axis(xVelocity, &xAxis, Modified::xAxisModified, modified_time);
     set_axis(yVelocity, &yAxis, Modified::yAxisModified, modified_time);
-    set_axis(wVelocity, &wAxis, Modified::wAxisModified, modified_time);
-
     Modified modified = Modified::wAxisModified | Modified::xAxisModified | Modified::yAxisModified;
     notify_change(modified);
 };

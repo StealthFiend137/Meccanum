@@ -42,7 +42,7 @@ public:
     /// @return Returns the speed of the axis. 
     int get_y_axis();
 
-    /// @brief 
+    /// @brief Flags for the possible values that have changed.
     enum class Modified
     {
         none = 0,
@@ -64,8 +64,6 @@ public:
     void register_callback(void (*callback)(Modified));
 
 private:
-
-    Modified modified;
 
     /// @brief Vector of callbacks used to notify of changes to chassis values.
     std::vector<void (*)(Modified)> _modificationCallbacks;
@@ -108,8 +106,7 @@ private:
     /// @return Returns the speed of the provided axis.
     int get_axis(AxisState* MovementAxis);
 
-
+    /// @brief Calls all of the callbacks that have been registered for updates when a value has been changed.
+    /// @param modified The values that have been modified.
     void notify_change(Modified modified);
-
-    void get_changed_axes(int current_time);
 };
