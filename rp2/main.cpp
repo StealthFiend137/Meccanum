@@ -23,7 +23,10 @@ static const uint I2C_SLAVE_SCL_PIN = 17; // Yellow
 static const uint I2C_SLAVE_ADDRESS = 0x17;
 static const uint I2C_SLAVE_BAUDRATE = 100000; // 100 kHz
 
-Chassis chassis(500);
+uint chassis_timeout_ms = 8000; // 8 seconds for testing only.
+Chassis chassis(chassis_timeout_ms);
+Chassis::Modified _modified = Chassis::Modified::none;
+
 I2cCommandReceiver i2cCommandReceiver(I2C_SLAVE_PORT, &chassis);
 
 int movementIntervalStartTime = to_ms_since_boot(get_absolute_time());
@@ -43,18 +46,43 @@ void indicate_status(int ms_since_boot)
     gpio_put(LED_STATUS_INDICATOR, ledOn);
 };
 
+void update_callback(Chassis::Modified modified)
+{
+    _modified = _modified | modified;
+};
+
 void action_movement(int ms_since_boot)
 {
     int elapsed_time = ms_since_boot - movementIntervalStartTime; 
     if(elapsed_time < 10) return;
 
     movementIntervalStartTime = ms_since_boot;
+
+    if (_modified == Chassis::Modified::none) return;
+
+    if((_modified & Chassis::Modified::wAxisModified) == Chassis::Modified::wAxisModified)
+    {
+        printf("w Axis Modified\n");
+    }
+
+    if((_modified & Chassis::Modified::xAxisModified) == Chassis::Modified::xAxisModified)
+    {
+        printf("x Axis Modified\n");
+    }
+
+    if((_modified & Chassis::Modified::yAxisModified) == Chassis::Modified::yAxisModified)
+    {
+        printf("y Axis Modified\n");
+    }
+
+    _modified = Chassis::Modified::none;
 };
 
 int main()
 {
     stdio_init_all();
     status_indicator_init();
+    chassis.register_callback(update_callback);
     
     i2cCommandReceiver.command_receiver_init(I2C_SLAVE_SDA_PIN, I2C_SLAVE_SCL_PIN, I2C_SLAVE_BAUDRATE, I2C_SLAVE_ADDRESS);
 
