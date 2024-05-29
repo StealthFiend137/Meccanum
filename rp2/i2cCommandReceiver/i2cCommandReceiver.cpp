@@ -4,11 +4,29 @@
 #include "i2cCommandReceiver.h"
 #include "registers.h"
 
+#include <cstdio>
+
 I2cCommandReceiver::I2cCommandReceiver(i2c_inst_t* i2c, Chassis* chassis)
 {
     this->_i2c_instance = i2c;
     this->_chassis = chassis;
+    this->_chassis->register_callback(update_notification_callback);
     I2cCommandReceiver::_instance = this;
+};
+
+void I2cCommandReceiver::update_notification_callback(Chassis::Modified modified)
+{
+    I2cCommandReceiver::_instance->update_notification(modified);
+};
+
+void I2cCommandReceiver::update_notification(Chassis::Modified modified)
+{
+    printf("axis modified: %d\n", modified);
+};
+
+void I2cCommandReceiver::ValuesUpdated(UpdatedValues updatedValues)
+{
+    printf("values have been updated: %d\n", updatedValues);
 };
 
 void I2cCommandReceiver::command_receiver_init(uint sda_pin, uint scl_pin, uint baudrate, uint8_t slave_address)
@@ -23,6 +41,7 @@ void I2cCommandReceiver::command_receiver_init(uint sda_pin, uint scl_pin, uint 
     
     i2c_init(_i2c_instance, baudrate);
     i2c_slave_init(_i2c_instance, slave_address, i2c_slave_isr);
+
 };
 
 void I2cCommandReceiver::i2c_slave_isr(i2c_inst_t *i2c, i2c_slave_event_t event)

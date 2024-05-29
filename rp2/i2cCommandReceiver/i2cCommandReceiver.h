@@ -6,7 +6,7 @@
 #include "../chassis/chassis.h"
 
 /// @brief Responsible for handling i2c communication and sending and receiving commands from the chassis.
-class I2cCommandReceiver
+class I2cCommandReceiver : virtual public UpdatedValuesEventListener
 {
 private:
 
@@ -18,7 +18,6 @@ private:
     Chassis* _chassis;
     I2cBuffer _i2c_buffer;
 
-    void debug_buffer();
     void commit_buffer();
 
     bool get_if_register_modified(I2cBuffer::ModifiedRegisters effectedRegister);
@@ -27,4 +26,8 @@ public:
 
     I2cCommandReceiver(i2c_inst_t* i2c, Chassis* chassis);
     void command_receiver_init(uint sda_pin, uint scl_pin, uint baudrate, uint8_t slave_address);
+    void ValuesUpdated(UpdatedValues updatedValues) override;
+    
+    static void update_notification_callback(Chassis::Modified modifed);
+    void update_notification(Chassis::Modified modifed);
 };

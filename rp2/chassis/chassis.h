@@ -1,5 +1,7 @@
 #pragma once
+#include <vector>
 #include "axisState.h"
+#include "updatedValuesEventListener.h"
 
 /// @brief Control and monitoring of the meccanum chassis.
 class Chassis
@@ -41,20 +43,32 @@ public:
     int get_y_axis();
 
     /// @brief 
-    enum Modified
+    enum class Modified
     {
-        xAxisModified = 1 >> 0,
-        yAxisModified = 1 >> 1,
-        wAxisModified = 1 >> 2
+        none = 0,
+        wAxisModified = 1,
+        xAxisModified = 2,
+        yAxisModified = 4
+    };
+
+    friend Modified operator | (const Modified a, const Modified b){
+        return static_cast<Modified>(static_cast<uint8_t>(a) | static_cast<uint8_t>(b));
+    };
+
+    friend Modified operator & (const Modified a, const Modified b){
+        return static_cast<Modified>(static_cast<uint8_t>(a) & static_cast<uint8_t>(b));
     };
 
     /// @brief 
     /// @param callback 
-    //void register_callback(void (*callback)(Modified));
+    void register_callback(void (*callback)(Modified));
 
 private:
 
     Modified modified;
+
+    /// @brief Vector of callbacks used to notify of changes to chassis values.
+    std::vector<void (*)(Modified)> _modificationCallbacks;
 
     /// @brief A repeating timer for ensuring the that non-perpetual chassis actions don't run away.
     struct repeating_timer decay_timer;
@@ -72,9 +86,6 @@ private:
 
     /// @brief The w axis.
     AxisState wAxis{0, 500};
-
-    /// @brief Vector of callbacks used to notify of changes to chassis values.
-    //std::vector<void (*)(Modified)> _modificationCallbacks;
 
     /// @brief Backing field for the amount of time in milliseconds without renewall until an action is stopped.
     uint _command_timeout_ms;
@@ -97,6 +108,8 @@ private:
     /// @return Returns the speed of the provided axis.
     int get_axis(AxisState* MovementAxis);
 
+
+    void notify_change(Modified modified);
 
     void get_changed_axes(int current_time);
 };

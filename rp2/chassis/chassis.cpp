@@ -34,17 +34,12 @@ bool Chassis::decay_callback(struct repeating_timer *t)
 void Chassis::get_changed_axes(int current_time)
 {
     Modified newModified;
-    
 
     // if(_axes_status.xAxis.has_decayed(current_time)) newModified = static_cast<Modified>(newModified | xAxisModified);
     // if(_axes_status.yAxis.has_decayed(current_time)) newModified = static_cast<Modified>(newModified | yAxisModified);
     // if(_axes_status.wAxis.has_decayed(current_time)) newModified = static_cast<Modified>(newModified | wAxisModified);
 
-    if(0 == newModified) return;
-
-    // std::for_each(this->_modificationCallbacks.begin(), this->_modificationCallbacks.end(), [modifiedAxis](void (*callback)(Modified)) {
-    //     callback(modifiedAxis);
-    // });
+    if(Modified::none == newModified) return;
 };
 
 /// @brief Sets all of the movement axes simultaneously.
@@ -54,18 +49,29 @@ void Chassis::get_changed_axes(int current_time)
 void Chassis::set_all_axes(int xVelocity, int yVelocity, int wVelocity)
 {
     int modified_time = to_ms_since_boot(get_absolute_time());
-    set_axis(xVelocity, &xAxis, xAxisModified, modified_time);
-    set_axis(yVelocity, &yAxis, yAxisModified, modified_time);
-    set_axis(wVelocity, &wAxis, wAxisModified, modified_time);
+    set_axis(xVelocity, &xAxis, Modified::xAxisModified, modified_time);
+    set_axis(yVelocity, &yAxis, Modified::yAxisModified, modified_time);
+    set_axis(wVelocity, &wAxis, Modified::wAxisModified, modified_time);
+
+    Modified modified = Modified::wAxisModified | Modified::xAxisModified | Modified::yAxisModified;
+    notify_change(modified);
+};
+
+void Chassis::notify_change(Modified modified)
+{
+    std::for_each(this->_modificationCallbacks.begin(), this->_modificationCallbacks.end(), [modified](void (*callback)(Modified)) {
+        callback(modified);
+    });
 };
 
 /// @brief Sets the value of the w axis.
 /// @param velocity The value of the w axis.
 void Chassis::set_w_axis(int velocity)
 {
-    Modified modifiedAxis = wAxisModified;
+    Modified modifiedAxis = Modified::wAxisModified;
     AxisState* axis = &wAxis;
     set_axis(velocity, axis, modifiedAxis);
+    notify_change(Modified::wAxisModified);
 };
 
 /// @brief Gets the value of the w axis.c++ 
@@ -79,9 +85,10 @@ int Chassis::get_w_axis()
 /// @param velocity The value of the x axis.
 void Chassis::set_x_axis(int velocity)
 {
-    Modified modifiedAxis = xAxisModified;
+    Modified modifiedAxis = Modified::xAxisModified;
     AxisState* axis = &xAxis;
     set_axis(velocity, axis, modifiedAxis);
+    notify_change(Modified::xAxisModified);
 };
 
 /// @brief Gets the value of the x axis.
@@ -95,9 +102,10 @@ int Chassis::get_x_axis()
 /// @param velocity The value of the y axis.
 void Chassis::set_y_axis(int velocity)
 {
-    Modified modifiedAxis = yAxisModified;
+    Modified modifiedAxis = Modified::yAxisModified;
     AxisState* axis = &yAxis;
     set_axis(velocity, axis, modifiedAxis);
+    notify_change(Modified::yAxisModified);
 };
 
 /// @brief Gets the value of the y axis.
@@ -107,10 +115,10 @@ int Chassis::get_y_axis()
     return get_axis(&yAxis);
 };
 
-// void Chassis::register_callback(void (*callback)(Modified))
-// {
-//     this->_modificationCallbacks.push_back(callback);
-// };
+void Chassis::register_callback(void (*callback)(Modified))
+{
+    this->_modificationCallbacks.push_back(callback);
+};
 
 /// @brief Private method to set the speed of a provided axis.
 /// @param speed The speed to set the axis to.
@@ -130,10 +138,6 @@ void Chassis::set_axis(int speed, AxisState* movementAxis, Modified modifiedAxis
 void Chassis::set_axis(int speed, AxisState* movementAxis, Modified modifiedAxis, int update_time)
 {
     movementAxis->set_speed(speed, update_time);
-
-//     std::for_each(this->_modificationCallbacks.begin(), this->_modificationCallbacks.end(), [modifiedAxis](void (*callback)(Modified)) {
-//         callback(modifiedAxis);
-//     });
 };
 
 /// @brief Private method to get the speed of a specified axis.
