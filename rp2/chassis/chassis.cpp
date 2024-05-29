@@ -5,27 +5,45 @@
 #include "chassis.h"
 #include "axisState.h"
 
-struct AxesStatus
-{
-    AxisState xAxis{0, 5000};
-    AxisState yAxis{0, 5000};
-    AxisState wAxis{0, 5000};
-};
+// struct AxesStatus
+// {
+//     AxisState xAxis{0, 7000};
+//     AxisState yAxis{0, 7000};
+//     AxisState wAxis{0, 7000};
+// };
 
 /// @brief Creates a new instance of the Chassis class.
 /// @param comamnd_timeout_ms The timeout in ms before items return to their default state.
-Chassis::Chassis(const uint comamnd_timeout_ms)
+Chassis::Chassis(const uint command_timeout_ms) :
+    wAxis(0, command_timeout_ms),
+    xAxis(0, command_timeout_ms),
+    yAxis(0, command_timeout_ms)
 {
-    this->_command_timeout_ms = comamnd_timeout_ms;
+    //TODO: actually implement this timeout.
+    this->_command_timeout_ms = command_timeout_ms;
+    Chassis::instance = this;
 
-    const int interval_ms = 2000;
+    const int interval_ms = 100;
     add_repeating_timer_ms(interval_ms, decay_callback, NULL, &decay_timer);
 };
 
 bool Chassis::decay_callback(struct repeating_timer *t)
 {
-    int ms_since_boot = to_ms_since_boot(get_absolute_time());
+    Chassis::instance->decay();
     return true;
+};
+
+void Chassis::decay()
+{
+    Modified modified = Modified::none;
+
+    int ms_since_boot = to_ms_since_boot(get_absolute_time());
+    if(wAxis.has_decayed(ms_since_boot)) modified = modified | Modified::wAxisModified;
+    if(xAxis.has_decayed(ms_since_boot)) modified = modified | Modified::xAxisModified;
+    if(yAxis.has_decayed(ms_since_boot)) modified = modified | Modified::yAxisModified;
+
+    if(Modified::none == modified) return;
+    notify_change(modified);
 };
 
 /// @brief Sets all of the movement axes simultaneously.

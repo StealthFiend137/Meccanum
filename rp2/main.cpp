@@ -23,7 +23,10 @@ static const uint I2C_SLAVE_SCL_PIN = 17; // Yellow
 static const uint I2C_SLAVE_ADDRESS = 0x17;
 static const uint I2C_SLAVE_BAUDRATE = 100000; // 100 kHz
 
-uint chassis_timeout_ms = 8000; // 8 seconds for testing only.
+// Will need to fine-tune this value to see what works best from the i2c host.
+//TODO: just to make things even more fun, consider making this timeout configurable.
+uint chassis_timeout_ms = 200;  
+
 Chassis chassis(chassis_timeout_ms);
 Chassis::Modified _modified = Chassis::Modified::none;
 

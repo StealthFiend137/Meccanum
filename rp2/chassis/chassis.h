@@ -10,7 +10,7 @@ public:
 
     /// @brief Create a new instance of the Chassis class.
     /// @param comamnd_timeout_ms The amount of time in milliseconds until a command is cancelled. The time is reset every time it is refreshed.
-    Chassis(const uint comamnd_timeout_ms);
+    Chassis(const uint command_timeout_ms);
 
     /// @brief Sets all of the movement axes simultaneously.
     /// @param xVelocity The value of the x axis.
@@ -65,6 +65,8 @@ public:
 
 private:
 
+    static inline Chassis* instance;
+
     /// @brief Vector of callbacks used to notify of changes to chassis values.
     std::vector<void (*)(Modified)> _modificationCallbacks;
 
@@ -77,13 +79,13 @@ private:
     static bool decay_callback(struct repeating_timer *t);
 
     /// @brief The x axis.
-    AxisState xAxis{0, 500};
+    AxisState xAxis;// {0, 500};
 
     /// @brief The y axis.
-    AxisState yAxis{0, 500};
+    AxisState yAxis;//{0, 500};
 
     /// @brief The w axis.
-    AxisState wAxis{0, 500};
+    AxisState wAxis;//{0, 500};
 
     /// @brief Backing field for the amount of time in milliseconds without renewall until an action is stopped.
     uint _command_timeout_ms;
@@ -109,4 +111,6 @@ private:
     /// @brief Calls all of the callbacks that have been registered for updates when a value has been changed.
     /// @param modified The values that have been modified.
     void notify_change(Modified modified);
+
+    void decay();
 };
