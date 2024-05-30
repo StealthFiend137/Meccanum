@@ -22,6 +22,9 @@ public:
 
     OpenLoop(int pwm_gpio, int direction_gpio, Orientation orientation);
     void set_speed(int speed_in_percent) override;
+
+private:
+    static int map_velocity(int percent);
 };
 
 

@@ -1,5 +1,8 @@
 #include "meccanum.h"
 
+#include <cmath>
+#include <algorithm>
+
 Meccanum::Meccanum(Chassis* chassis, Motors::Motor* frontLeft, Motors::Motor* frontRight, Motors::Motor* rearLeft, Motors::Motor* rearRight):
     _chassis(chassis), _frontLeft(frontLeft), _frontRight(frontRight), _rearLeft(rearLeft), _rearRight(rearRight)
 {
@@ -40,9 +43,9 @@ void Meccanum::action_updates()
     | ((this->_modified & Chassis::Modified::xAxisModified) == Chassis::Modified::xAxisModified)
     | ((this->_modified & Chassis::Modified::yAxisModified) == Chassis::Modified::yAxisModified))
     {
-        wAxis_current = wAxis_new;
-        xAxis_current = xAxis_new;
-        yAxis_current = yAxis_new;
+        this->wAxis_current = wAxis_new;
+        this->xAxis_current = xAxis_new;
+        this->yAxis_current = yAxis_new;
         this->action_movement();
     }
 
@@ -51,8 +54,36 @@ void Meccanum::action_updates()
 
 void Meccanum::action_movement()
 {
-    _frontLeft->set_speed(100);
-    _frontRight->set_speed(100);
-    _rearLeft->set_speed(100);
-    _rearRight->set_speed(100);
+    _frontLeft->set_speed(this->wAxis_current);
+    _frontRight->set_speed(this->xAxis_current);
+    _rearLeft->set_speed(this->yAxis_current);
+    _rearRight->set_speed(this->yAxis_current);
+};
+
+void calculateWheelVelocities(int w, int x, int y, int &frontLeft, int &frontRight, int &rearLeft,int &rearRight)
+{
+    double lx = 0.5;
+    double wx = 0.5;
+
+    double v_fl = y + x - w * (lx+wx);
+    double v_fr = y - x - w * (lx+wx);
+    double v_rl = y - x + w * (lx+wx);
+    double v_rr = y + x + w * (lx+wx);
+
+    double max = std::max(std::abs(v_fl), std::abs(v_fr));
+    max = std::max(max, std::abs(v_rl));
+    max = std::max(max, std::abs(v_rr));
+
+    if(max > 100)
+    {
+        v_fl = (v_fl / max) * 100;
+        v_fr = (v_fr / max) * 100;
+        v_rl = (v_rl / max) * 100;
+        v_rr = (v_rr / max) * 100;
+    }
+
+    frontLeft = v_fl;
+    frontRight = v_fr;
+    rearLeft = v_rl;
+    rearRight = v_rr;
 };

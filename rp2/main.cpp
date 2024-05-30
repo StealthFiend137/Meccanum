@@ -101,8 +101,15 @@ int main()
 
     /*
     delete frontLeft;
+    frontLeft = nullptr;
+
     delete frontRight;
+    frontRight = nullptr;
+
     delete rearLeft;
+    rearLeft = nullptr;
+
     delete rearRight;
+    rearRight = nullptr;
     */
 };
