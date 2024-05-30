@@ -23,8 +23,10 @@ project(main C CXX ASM)
 # Initialise the Raspberry Pi Pico SDK
 pico_sdk_init()
 
+# file(GLOB SOURCES *.cpp)
+
 # Add executable. Default name is the project name, version 0.1
-add_executable(main main.cpp )
+add_executable(main main.cpp meccanum.cpp)
 add_subdirectory(chassis)
 add_subdirectory(i2cCommandReceiver)
 

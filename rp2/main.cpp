@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include "chassis/chassis.h"
+#include "meccanum.h"
 #include "i2cCommandReceiver/i2cCommandReceiver.h"
 
 #define I2C_SLAVE_PORT i2c0
@@ -28,8 +29,7 @@ static const uint I2C_SLAVE_BAUDRATE = 100000; // 100 kHz
 uint chassis_timeout_ms = 200;  
 
 Chassis chassis(chassis_timeout_ms);
-Chassis::Modified _modified = Chassis::Modified::none;
-
+Meccanum drivetrain(&chassis);
 I2cCommandReceiver i2cCommandReceiver(I2C_SLAVE_PORT, &chassis);
 
 int movementIntervalStartTime = to_ms_since_boot(get_absolute_time());
@@ -49,39 +49,12 @@ void indicate_status(int ms_since_boot)
     gpio_put(LED_STATUS_INDICATOR, ledOn);
 };
 
-void update_callback(Chassis::Modified modified)
-{
-    _modified = _modified | modified;
-};
-
 void action_movement(int ms_since_boot)
 {
     int elapsed_time = ms_since_boot - movementIntervalStartTime; 
-    if(elapsed_time < 10) return;
-
+    if(elapsed_time < 50) return;
     movementIntervalStartTime = ms_since_boot;
-
-    if (_modified == Chassis::Modified::none) return;
-
-    if((_modified & Chassis::Modified::wAxisModified) == Chassis::Modified::wAxisModified)
-    {
-        int velocity = chassis.get_w_axis();
-        printf("w Axis Modified to %d\n", velocity);
-    }
-
-    if((_modified & Chassis::Modified::xAxisModified) == Chassis::Modified::xAxisModified)
-    {
-        int velocity = chassis.get_x_axis();
-        printf("x Axis Modified to %d\n", velocity);
-    }
-
-    if((_modified & Chassis::Modified::yAxisModified) == Chassis::Modified::yAxisModified)
-    {
-        int velocity = chassis.get_y_axis();
-        printf("y Axis Modified to %d\n", velocity);
-    }
-
-    _modified = Chassis::Modified::none;
+    drivetrain.action_updates();
 };
 
 int main()
@@ -89,7 +62,6 @@ int main()
     stdio_init_all();
     status_indicator_init();
 
-    chassis.register_callback(update_callback);  
     i2cCommandReceiver.command_receiver_init(I2C_SLAVE_SDA_PIN, I2C_SLAVE_SCL_PIN, I2C_SLAVE_BAUDRATE, I2C_SLAVE_ADDRESS);
 
     // uart_init(uart0, 115200);
