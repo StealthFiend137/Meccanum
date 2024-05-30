@@ -18,6 +18,15 @@
 #define UART_TX_PIN 0
 #define UART_RX_PIN 1
 
+#define motor_0_pwm_gpio 4
+#define motor_0_direction_gpio 6
+#define motor_1_pwm_gpio 5
+#define motor_1_direction_gpio 10
+#define motor_2_pwm_gpio 8
+#define motor_2_direction_gpio 12
+#define motor_3_pwm_gpio 9
+#define motor_3_direction_gpio 13
+
 // I2C
 static const uint I2C_SLAVE_SDA_PIN = 16; // Green
 static const uint I2C_SLAVE_SCL_PIN = 17; // Yellow
@@ -29,7 +38,12 @@ static const uint I2C_SLAVE_BAUDRATE = 100000; // 100 kHz
 uint chassis_timeout_ms = 200;  
 
 Chassis chassis(chassis_timeout_ms);
-Meccanum drivetrain(&chassis);
+Meccanum drivetrain(&chassis,
+    motor_0_pwm_gpio, motor_0_direction_gpio,
+    motor_1_pwm_gpio, motor_1_direction_gpio,
+    motor_2_pwm_gpio, motor_2_direction_gpio,
+    motor_3_pwm_gpio, motor_3_direction_gpio);
+
 I2cCommandReceiver i2cCommandReceiver(I2C_SLAVE_PORT, &chassis);
 
 int movementIntervalStartTime = to_ms_since_boot(get_absolute_time());
@@ -63,6 +77,8 @@ int main()
     status_indicator_init();
 
     i2cCommandReceiver.command_receiver_init(I2C_SLAVE_SDA_PIN, I2C_SLAVE_SCL_PIN, I2C_SLAVE_BAUDRATE, I2C_SLAVE_ADDRESS);
+
+    drivetrain.show_pins();
 
     // uart_init(uart0, 115200);
     // gpio_set_function(0, GPIO_FUNC_UART);

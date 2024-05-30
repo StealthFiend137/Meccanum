@@ -6,9 +6,14 @@ class Meccanum
 {
 public:
 
-    Meccanum(Chassis* chassis);
+    Meccanum(Chassis* chassis,
+    int pwm_0_gpio, int direction_0_gpio,
+    int pwm_1_gpio, int direction_1_gpio,
+    int pwm_2_gpio, int direction_2_gpio,
+    int pwm_3_gpio, int direction_3_gpio);
+    
     void action_updates();
-
+    
 private:
 
     Chassis* _chassis;
@@ -27,4 +32,13 @@ private:
     int wAxis_current { 0 };
     int xAxis_current { 0 };
     int yAxis_current { 0 };
+
+    int _pwm_0_gpio;
+    int _direction_0_gpio;
+    int _pwm_1_gpio;
+    int _direction_1_gpio;
+    int _pwm_2_gpio;
+    int _direction_2_gpio;
+    int _pwm_3_gpio;
+    int _direction_3_gpio;
 };
