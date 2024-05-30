@@ -78,8 +78,6 @@ int main()
 
     i2cCommandReceiver.command_receiver_init(I2C_SLAVE_SDA_PIN, I2C_SLAVE_SCL_PIN, I2C_SLAVE_BAUDRATE, I2C_SLAVE_ADDRESS);
 
-    drivetrain.show_pins();
-
     // uart_init(uart0, 115200);
     // gpio_set_function(0, GPIO_FUNC_UART);
     // gpio_set_function(1, GPIO_FUNC_UART);
