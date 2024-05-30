@@ -88,9 +88,13 @@ int main()
 {
     stdio_init_all();
     status_indicator_init();
-    chassis.register_callback(update_callback);
-    
+
+    chassis.register_callback(update_callback);  
     i2cCommandReceiver.command_receiver_init(I2C_SLAVE_SDA_PIN, I2C_SLAVE_SCL_PIN, I2C_SLAVE_BAUDRATE, I2C_SLAVE_ADDRESS);
+
+    // uart_init(uart0, 115200);
+    // gpio_set_function(0, GPIO_FUNC_UART);
+    // gpio_set_function(1, GPIO_FUNC_UART);
 
     printf("\n==========================\nReady\n==========================\n");
 
@@ -99,5 +103,11 @@ int main()
         auto ms_since_boot = to_ms_since_boot(get_absolute_time());
         indicate_status(ms_since_boot);
         action_movement(ms_since_boot);
+
+        // if(uart_is_readable(uart0))
+        // {
+        //     char c = uart_getc(uart0);
+        //     uart_putc(uart0, c);
+        // }
     }
 };
