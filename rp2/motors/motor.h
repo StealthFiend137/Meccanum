@@ -1,11 +1,11 @@
 #pragma once
 
-namespace Motor
+namespace Motors
 {
     class Motor;
 };
 
-class Motor::Motor
+class Motors::Motor
 {
 public:
 

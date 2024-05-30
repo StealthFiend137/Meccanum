@@ -6,6 +6,8 @@
 #include <string.h>
 
 #include "chassis/chassis.h"
+#include "motors/motor.h"
+#include "motors/openLoop.h"
 #include "meccanum.h"
 #include "i2cCommandReceiver/i2cCommandReceiver.h"
 
@@ -18,14 +20,14 @@
 #define UART_TX_PIN 0
 #define UART_RX_PIN 1
 
-#define motor_0_pwm_gpio 4
-#define motor_0_direction_gpio 6
-#define motor_1_pwm_gpio 5
-#define motor_1_direction_gpio 10
-#define motor_2_pwm_gpio 8
-#define motor_2_direction_gpio 12
-#define motor_3_pwm_gpio 9
-#define motor_3_direction_gpio 13
+#define MOTOR_0_PWM_GPIO 4
+#define MOTOR_0_DIRECTION_GPIO 6
+#define MOTOR_1_PWM_GPIO 5
+#define MOTOR_1_DIRECTION_GPIO 10
+#define MOTOR_2_PWM_GPIO 8
+#define MOTOR_2_DIRECTION_GPIO 12
+#define MOTOR_3_PWM_GPIO 9
+#define MOTOR_3_DIRECTION_GPIO 13
 
 // I2C
 static const uint I2C_SLAVE_SDA_PIN = 16; // Green
@@ -36,13 +38,13 @@ static const uint I2C_SLAVE_BAUDRATE = 100000; // 100 kHz
 // Will need to fine-tune this value to see what works best from the i2c host.
 //TODO: just to make things even more fun, consider making this timeout configurable.
 uint chassis_timeout_ms = 200;  
-
 Chassis chassis(chassis_timeout_ms);
-Meccanum drivetrain(&chassis,
-    motor_0_pwm_gpio, motor_0_direction_gpio,
-    motor_1_pwm_gpio, motor_1_direction_gpio,
-    motor_2_pwm_gpio, motor_2_direction_gpio,
-    motor_3_pwm_gpio, motor_3_direction_gpio);
+
+Motors::Motor* frontLeft = new Motors::OpenLoop(MOTOR_0_PWM_GPIO, MOTOR_0_DIRECTION_GPIO, Motors::OpenLoop::Orientation::clockwise);
+Motors::Motor* frontRight = new Motors::OpenLoop(MOTOR_1_PWM_GPIO, MOTOR_1_DIRECTION_GPIO, Motors::OpenLoop::Orientation::clockwise);
+Motors::Motor* rearLeft = new Motors::OpenLoop(MOTOR_2_PWM_GPIO, MOTOR_2_DIRECTION_GPIO, Motors::OpenLoop::Orientation::clockwise);
+Motors::Motor* rearRight = new Motors::OpenLoop(MOTOR_3_PWM_GPIO, MOTOR_3_DIRECTION_GPIO, Motors::OpenLoop::Orientation::clockwise);
+Meccanum drivetrain(&chassis, frontLeft, frontRight, rearLeft, rearRight);
 
 I2cCommandReceiver i2cCommandReceiver(I2C_SLAVE_PORT, &chassis);
 
@@ -96,4 +98,11 @@ int main()
         //     uart_putc(uart0, c);
         // }
     }
+
+    /*
+    delete frontLeft;
+    delete frontRight;
+    delete rearLeft;
+    delete rearRight;
+    */
 };

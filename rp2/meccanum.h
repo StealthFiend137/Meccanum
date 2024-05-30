@@ -1,17 +1,14 @@
 #pragma once
 #include <cstdio>
+#include "motors/motor.h"
 #include "chassis/chassis.h"
+
 
 class Meccanum
 {
 public:
 
-    Meccanum(Chassis* chassis,
-    int pwm_0_gpio, int direction_0_gpio,
-    int pwm_1_gpio, int direction_1_gpio,
-    int pwm_2_gpio, int direction_2_gpio,
-    int pwm_3_gpio, int direction_3_gpio);
-    
+    Meccanum(Chassis* chassis, Motors::Motor* frontLeft, Motors::Motor* frontRight, Motors::Motor* rearLeft, Motors::Motor* rearRight);
     void action_updates();
     
 private:
@@ -33,12 +30,8 @@ private:
     int xAxis_current { 0 };
     int yAxis_current { 0 };
 
-    int _pwm_0_gpio;
-    int _direction_0_gpio;
-    int _pwm_1_gpio;
-    int _direction_1_gpio;
-    int _pwm_2_gpio;
-    int _direction_2_gpio;
-    int _pwm_3_gpio;
-    int _direction_3_gpio;
+    Motors::Motor* _frontLeft = nullptr;
+    Motors::Motor* _frontRight = nullptr;
+    Motors::Motor* _rearLeft = nullptr;
+    Motors::Motor* _rearRight = nullptr;
 };

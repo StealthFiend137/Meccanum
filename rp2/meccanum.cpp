@@ -1,15 +1,7 @@
 #include "meccanum.h"
 
-Meccanum::Meccanum(Chassis* chassis,
-    int pwm_0_gpio, int direction_0_gpio,
-    int pwm_1_gpio, int direction_1_gpio,
-    int pwm_2_gpio, int direction_2_gpio,
-    int pwm_3_gpio, int direction_3_gpio):
-    _chassis(chassis),
-    _pwm_0_gpio(pwm_0_gpio), _direction_0_gpio(direction_0_gpio),
-    _pwm_1_gpio(pwm_1_gpio), _direction_1_gpio(direction_1_gpio),
-    _pwm_2_gpio(pwm_2_gpio), _direction_2_gpio(direction_2_gpio),
-    _pwm_3_gpio(pwm_3_gpio), _direction_3_gpio(direction_3_gpio)
+Meccanum::Meccanum(Chassis* chassis, Motors::Motor* frontLeft, Motors::Motor* frontRight, Motors::Motor* rearLeft, Motors::Motor* rearRight):
+    _chassis(chassis), _frontLeft(frontLeft), _frontRight(frontRight), _rearLeft(rearLeft), _rearRight(rearRight)
 {
     chassis->register_callback(update_callback);
     Meccanum::_instance = this;
@@ -59,5 +51,8 @@ void Meccanum::action_updates()
 
 void Meccanum::action_movement()
 {
-    printf("Axis Modified. %d, %d, %d\n", wAxis_current, xAxis_current, yAxis_current);
+    _frontLeft->set_speed(100);
+    _frontRight->set_speed(100);
+    _rearLeft->set_speed(100);
+    _rearRight->set_speed(100);
 };

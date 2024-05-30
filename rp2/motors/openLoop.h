@@ -1,6 +1,12 @@
+#pragma once
 #include "motor.h"
 
-class OpenLoop : public virtual Motor::Motor
+namespace Motors
+{
+    class OpenLoop;  
+};
+
+class Motors::OpenLoop : public virtual Motors::Motor
 {
 public:
 
@@ -11,11 +17,10 @@ public:
     };
 
     int _pwm_gpio;
-    int _direction_forwards_gpio;
-    int _direction_reverse_gpio;
+    int _direction_gpio;
     Orientation _orientation;
 
-    OpenLoop(int pwm_gpio, int direction_forwards_gpio, int direction_reverse_gpio, Orientation Orientation);
+    OpenLoop(int pwm_gpio, int direction_gpio, Orientation orientation);
     void set_speed(int speed_in_percent) override;
 };
 
