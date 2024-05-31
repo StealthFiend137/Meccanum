@@ -19,6 +19,7 @@ private:
     static void update_callback(Chassis::Modified modified);
     void update_values(Chassis::Modified modified);
     void action_movement();
+    void calculateWheelVelocities(const int w, const int x, const int y, int &frontLeft, int &frontRight, int &rearLeft,int &rearRight);
 
     Chassis::Modified _modified { Chassis::Modified::none };
 

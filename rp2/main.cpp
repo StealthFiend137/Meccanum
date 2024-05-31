@@ -40,9 +40,9 @@ static const uint I2C_SLAVE_BAUDRATE = 100000; // 100 kHz
 uint chassis_timeout_ms = 200;  
 Chassis chassis(chassis_timeout_ms);
 
-Motors::Motor* frontLeft = new Motors::OpenLoop(MOTOR_0_PWM_GPIO, MOTOR_0_DIRECTION_GPIO, Motors::OpenLoop::Orientation::clockwise);
+Motors::Motor* frontLeft = new Motors::OpenLoop(MOTOR_0_PWM_GPIO, MOTOR_0_DIRECTION_GPIO, Motors::OpenLoop::Orientation::anticlockwise);
 Motors::Motor* frontRight = new Motors::OpenLoop(MOTOR_1_PWM_GPIO, MOTOR_1_DIRECTION_GPIO, Motors::OpenLoop::Orientation::clockwise);
-Motors::Motor* rearLeft = new Motors::OpenLoop(MOTOR_2_PWM_GPIO, MOTOR_2_DIRECTION_GPIO, Motors::OpenLoop::Orientation::clockwise);
+Motors::Motor* rearLeft = new Motors::OpenLoop(MOTOR_2_PWM_GPIO, MOTOR_2_DIRECTION_GPIO, Motors::OpenLoop::Orientation::anticlockwise);
 Motors::Motor* rearRight = new Motors::OpenLoop(MOTOR_3_PWM_GPIO, MOTOR_3_DIRECTION_GPIO, Motors::OpenLoop::Orientation::clockwise);
 Meccanum drivetrain(&chassis, frontLeft, frontRight, rearLeft, rearRight);
 

@@ -54,13 +54,17 @@ void Meccanum::action_updates()
 
 void Meccanum::action_movement()
 {
-    _frontLeft->set_speed(this->wAxis_current);
-    _frontRight->set_speed(this->xAxis_current);
-    _rearLeft->set_speed(this->yAxis_current);
-    _rearRight->set_speed(this->yAxis_current);
+
+    int fl, fr, rl, rr;
+    calculateWheelVelocities(this->wAxis_current, this->xAxis_current, this->yAxis_current, fl, fr, rl, rr);
+
+    _frontLeft->set_speed(fl);
+    _frontRight->set_speed(fr);
+    _rearLeft->set_speed(rl);
+    _rearRight->set_speed(rr);
 };
 
-void calculateWheelVelocities(int w, int x, int y, int &frontLeft, int &frontRight, int &rearLeft,int &rearRight)
+void Meccanum::calculateWheelVelocities(const int w, const int x, const int y, int &frontLeft, int &frontRight, int &rearLeft,int &rearRight)
 {
     double lx = 0.5;
     double wx = 0.5;

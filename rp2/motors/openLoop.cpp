@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <cmath>
 #include "pico/stdlib.h"
 #include "hardware/gpio.h"
 #include "hardware/pwm.h"
@@ -25,26 +26,26 @@ int Motors::OpenLoop::map_velocity(int percent)
     const int outputMin = -255;
     const int outputMax = 255;
 
-    return outputMin + (percent - inputMin) * (outputMax - outputMin) / (inputMax - inputMin);
+    int velocity = outputMin + (percent - inputMin) * (outputMax - outputMin) / (inputMax - inputMin);
+    return abs(velocity);
 };
+
+bool Motors::OpenLoop::get_direction(int percent)
+{
+    if(percent > 0) {
+        return _orientation == Orientation::clockwise;
+    }
+
+    return !(_orientation == Orientation::clockwise);
+}
 
 void Motors::OpenLoop::set_speed(int speed_in_percent)
 {
-    bool direction;
-    switch(this->_orientation)
-    {
-        case(Orientation::clockwise):
-            direction = speed_in_percent > 0;
-            break;
-
-        case(Orientation::anticlockwise):
-            direction = speed_in_percent < 0;
-            break;
-    }
-
+    bool direction = get_direction(speed_in_percent);
     int velocity = map_velocity(speed_in_percent);
 
     gpio_put(this->_direction_gpio, direction);
+    pwm_set_gpio_level(this->_pwm_gpio, velocity);
 
-    printf("Setting percent of %d speed to %d\n", speed_in_percent, velocity);
+    printf("Direction pin %s, pwm %d.\n", direction ? "on" : "off", velocity);
 };

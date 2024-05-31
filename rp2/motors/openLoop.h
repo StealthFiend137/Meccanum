@@ -24,10 +24,6 @@ public:
     void set_speed(int speed_in_percent) override;
 
 private:
-    static int map_velocity(int percent);
+    int map_velocity(int percent);
+    bool get_direction(int percent);
 };
-
-
-
-
-
