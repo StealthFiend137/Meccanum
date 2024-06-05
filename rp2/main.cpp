@@ -10,6 +10,8 @@
 #include "motors/openLoop.h"
 #include "meccanum.h"
 #include "i2cCommandReceiver/i2cCommandReceiver.h"
+#include "i2cMultiplexer/i2cMultiplexer.h"
+#include "mcp23017.h"
 
 #define I2C_SLAVE_PORT i2c0
 #define I2C_MASTER_PORT i2c1
@@ -40,6 +42,12 @@ static const uint I2C_SLAVE_BAUDRATE = 100000; // 100 kHz
 uint chassis_timeout_ms = 200;  
 Chassis chassis(chassis_timeout_ms);
 
+#define MCPADDRESS 0x27
+MCP23017 mcp23017(I2C_MASTER_PORT, MCPADDRESS);
+
+
+
+
 Motors::Motor* frontLeft = new Motors::OpenLoop(MOTOR_0_PWM_GPIO, MOTOR_0_DIRECTION_GPIO, Motors::OpenLoop::Orientation::anticlockwise);
 Motors::Motor* frontRight = new Motors::OpenLoop(MOTOR_1_PWM_GPIO, MOTOR_1_DIRECTION_GPIO, Motors::OpenLoop::Orientation::clockwise);
 Motors::Motor* rearLeft = new Motors::OpenLoop(MOTOR_2_PWM_GPIO, MOTOR_2_DIRECTION_GPIO, Motors::OpenLoop::Orientation::anticlockwise);
@@ -47,6 +55,9 @@ Motors::Motor* rearRight = new Motors::OpenLoop(MOTOR_3_PWM_GPIO, MOTOR_3_DIRECT
 Meccanum drivetrain(&chassis, frontLeft, frontRight, rearLeft, rearRight);
 
 I2cCommandReceiver i2cCommandReceiver(I2C_SLAVE_PORT, &chassis);
+
+
+
 
 int movementIntervalStartTime = to_ms_since_boot(get_absolute_time());
 int modifiedRegisterCount;

@@ -30,6 +30,7 @@ add_executable(main ${SOURCES})
 add_subdirectory(motors)
 add_subdirectory(chassis)
 add_subdirectory(i2cCommandReceiver)
+add_subdirectory(i2cMultiplexer)
 
 
 
