@@ -1,9 +1,9 @@
+#include <stdio.h>
+#include <string.h>
 #include <hardware/i2c.h>
 #include <hardware/uart.h>
 #include <pico/stdlib.h>
 #include <pico/i2c_slave.h>
-#include <stdio.h>
-#include <string.h>
 
 #include "chassis/chassis.h"
 #include "motors/motor.h"
@@ -11,7 +11,6 @@
 #include "meccanum.h"
 #include "i2cCommandReceiver/i2cCommandReceiver.h"
 #include "i2cMultiplexer/i2cMultiplexer.h"
-#include "mcp23017.h"
 
 #define I2C_SLAVE_PORT i2c0
 #define I2C_MASTER_PORT i2c1
@@ -42,9 +41,15 @@ static const uint I2C_SLAVE_BAUDRATE = 100000; // 100 kHz
 uint chassis_timeout_ms = 200;  
 Chassis chassis(chassis_timeout_ms);
 
-#define MCPADDRESS 0x27
-MCP23017 mcp23017(I2C_MASTER_PORT, MCPADDRESS);
 
+
+#define MASTER_DATA_PIN 2
+#define MOTOR_0_CLOCK_PIN 3
+#define MOTOR_1_CLOCK_PIN 7
+#define MOTOR_2_CLOCK_PIN 11
+#define MOTOR_3_CLOCK_PIN 15
+#define ADDITIONAL_I2C_CLOCK_PIN 19
+I2cMultiplexer i2cMultiplexer(I2C_MASTER_PORT, MASTER_DATA_PIN);
 
 
 
@@ -84,8 +89,28 @@ void action_movement(int ms_since_boot)
     drivetrain.action_updates();
 };
 
+void create_multiplexer_channels(I2cMultiplexedChannel** motors, I2cMultiplexedChannel* extender)
+{
+    extender = i2cMultiplexer.create_channel(ADDITIONAL_I2C_CLOCK_PIN);
+    I2cMultiplexedChannel* _motors[4] =
+    {
+        i2cMultiplexer.create_channel(MOTOR_0_CLOCK_PIN),
+        i2cMultiplexer.create_channel(MOTOR_1_CLOCK_PIN),
+        i2cMultiplexer.create_channel(MOTOR_2_CLOCK_PIN),
+        i2cMultiplexer.create_channel(MOTOR_3_CLOCK_PIN)
+    };
+
+    motors = _motors;
+};
+
 int main()
 {
+    I2cMultiplexedChannel* i2cMotorChannels[4];
+    I2cMultiplexedChannel* i2cExtenderChannel;
+    create_multiplexer_channels(i2cMotorChannels, i2cExtenderChannel);
+    
+
+
     stdio_init_all();
     status_indicator_init();
 
@@ -122,5 +147,8 @@ int main()
 
     delete rearRight;
     rearRight = nullptr;
+
+    delete extended_io_channel;
+    extended_io_channel = nullptr;
     */
 };

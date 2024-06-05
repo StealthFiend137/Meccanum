@@ -1,8 +1,6 @@
 #pragma once
 #include <hardware/i2c.h>
-
-/// @brief Forward declaration to prevent circular reference.
-class I2cMultiplexedChannel;
+#include "i2cMultiplexedChannel.h"
 
 class I2cMultiplexer
 {
