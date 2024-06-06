@@ -5,13 +5,9 @@
 #include "hardware/pwm.h"
 #include "openLoop.h"
 
-Motors::OpenLoop::OpenLoop(int pwm_gpio, int direction_gpio, Orientation orientation):
-    _pwm_gpio(pwm_gpio), _direction_gpio(direction_gpio), _orientation(orientation)
+Motors::OpenLoop::OpenLoop(int pwm_gpio, ControlPins::ControlPin* clockwisePin, ControlPins::ControlPin* antiClockwisePin):
+    _pwm_gpio(pwm_gpio), _clockwisePin(clockwisePin), _antiClockwisePin(antiClockwisePin)
 {
-    gpio_init(direction_gpio);
-    gpio_set_dir(direction_gpio, GPIO_OUT);
-    gpio_put(direction_gpio, true);
-
     gpio_set_function(pwm_gpio, GPIO_FUNC_PWM);
     uint slice_num = pwm_gpio_to_slice_num(pwm_gpio);
     pwm_config config = pwm_get_default_config();
@@ -32,20 +28,27 @@ int Motors::OpenLoop::map_velocity(int percent)
 
 bool Motors::OpenLoop::get_direction(int percent)
 {
-    if(percent > 0) {
-        return _orientation == Orientation::clockwise;
-    }
-
-    return !(_orientation == Orientation::clockwise);
+   return true;
 }
 
 void Motors::OpenLoop::set_speed(int speed_in_percent)
 {
-    bool direction = get_direction(speed_in_percent);
+    // bool direction = get_direction(speed_in_percent);
+    auto newClockwisePinState = ControlPins::ControlPin::PinState::Low;
+    auto newAnticlockwisePinState = ControlPins::ControlPin::PinState::Low;
+
+    if(speed_in_percent > 0)
+    {
+        newClockwisePinState = ControlPins::ControlPin::PinState::High;
+    }
+    else
+    {
+        newAnticlockwisePinState = ControlPins::ControlPin::PinState::High;
+    }
+
+    this->_clockwisePin->SetPinState(newClockwisePinState);
+    this->_antiClockwisePin->SetPinState(newAnticlockwisePinState);
+
     int velocity = map_velocity(speed_in_percent);
-
-    gpio_put(this->_direction_gpio, direction);
     pwm_set_gpio_level(this->_pwm_gpio, velocity);
-
-    printf("Direction pin %s, pwm %d.\n", direction ? "on" : "off", velocity);
 };

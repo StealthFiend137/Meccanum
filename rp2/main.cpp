@@ -14,6 +14,9 @@
 #include "i2cCommandReceiver/i2cCommandReceiver.h"
 #include "i2cMultiplexer/i2cMultiplexer.h"
 
+#include "ioExtenders/mcp23017.h"
+#include "ioExtenders/mcp23017_ControlPin.h"
+
 #include <time.h>
 
 #define I2C_SLAVE_PORT i2c0
@@ -26,13 +29,9 @@
 #define UART_RX_PIN 1
 
 #define MOTOR_0_PWM_GPIO 4
-#define MOTOR_0_DIRECTION_GPIO 6
 #define MOTOR_1_PWM_GPIO 5
-#define MOTOR_1_DIRECTION_GPIO 10
 #define MOTOR_2_PWM_GPIO 8
-#define MOTOR_2_DIRECTION_GPIO 12
 #define MOTOR_3_PWM_GPIO 9
-#define MOTOR_3_DIRECTION_GPIO 13
 
 // Slave I2c (for communication with an external contoller)
 static const uint I2C_SLAVE_SDA_PIN = 16; // Green
@@ -45,6 +44,9 @@ static const uint I2C_SLAVE_BAUDRATE = 100000; // 100 kHz
 uint chassis_timeout_ms = 200;  
 Chassis chassis(chassis_timeout_ms);
 
+// I2C Master channel setup
+// ============================================================================
+
 #define I2C_MASTER_DATA_PIN 2
 #define I2C_MASTER_MOTOR_0_CLOCK_PIN 3
 #define I2C_MASTER_MOTOR_1_CLOCK_PIN 7
@@ -56,10 +58,26 @@ I2cMultiplexer i2cMultiplexer(I2C_MASTER_PORT, I2C_MASTER_DATA_PIN);
 I2cMultiplexedChannel* i2cExtenderChannel = nullptr;
 I2cMultiplexedChannel* i2cMotorChannels[4];
 
-Motors::Motor* frontLeft = new Motors::OpenLoop(MOTOR_0_PWM_GPIO, MOTOR_0_DIRECTION_GPIO, Motors::OpenLoop::Orientation::anticlockwise);
-Motors::Motor* frontRight = new Motors::OpenLoop(MOTOR_1_PWM_GPIO, MOTOR_1_DIRECTION_GPIO, Motors::OpenLoop::Orientation::clockwise);
-Motors::Motor* rearLeft = new Motors::OpenLoop(MOTOR_2_PWM_GPIO, MOTOR_2_DIRECTION_GPIO, Motors::OpenLoop::Orientation::anticlockwise);
-Motors::Motor* rearRight = new Motors::OpenLoop(MOTOR_3_PWM_GPIO, MOTOR_3_DIRECTION_GPIO, Motors::OpenLoop::Orientation::clockwise);
+IoExtenders::Mcp23017 mcp23017(I2C_MASTER_PORT, 0x20);
+
+ControlPins::ControlPin* motor_0_cw = new ControlPins::Mcp23017_ControlPin(&mcp23017, IoExtenders::Mcp23017::Bank::A, 1);
+ControlPins::ControlPin* motor_0_acw = new ControlPins::Mcp23017_ControlPin(&mcp23017, IoExtenders::Mcp23017::Bank::A, 2);
+ControlPins::ControlPin* motor_1_cw = new ControlPins::Mcp23017_ControlPin(&mcp23017, IoExtenders::Mcp23017::Bank::A, 3);
+ControlPins::ControlPin* motor_1_acw = new ControlPins::Mcp23017_ControlPin(&mcp23017, IoExtenders::Mcp23017::Bank::A, 4);
+ControlPins::ControlPin* motor_2_cw = new ControlPins::Mcp23017_ControlPin(&mcp23017, IoExtenders::Mcp23017::Bank::A, 5);
+ControlPins::ControlPin* motor_2_acw = new ControlPins::Mcp23017_ControlPin(&mcp23017, IoExtenders::Mcp23017::Bank::A, 6);
+ControlPins::ControlPin* motor_3_cw = new ControlPins::Mcp23017_ControlPin(&mcp23017, IoExtenders::Mcp23017::Bank::A, 7);
+ControlPins::ControlPin* motor_3_acw = new ControlPins::Mcp23017_ControlPin(&mcp23017, IoExtenders::Mcp23017::Bank::A, 8);
+
+ControlPins::ControlPin* motor_driver_0_enable = new ControlPins::Mcp23017_ControlPin(&mcp23017, IoExtenders::Mcp23017::Bank::B, 1);
+ControlPins::ControlPin* motor_driver_1_enable = new ControlPins::Mcp23017_ControlPin(&mcp23017, IoExtenders::Mcp23017::Bank::B, 2);
+
+// ============================================================================
+
+Motors::Motor* frontLeft = new Motors::OpenLoop(MOTOR_0_PWM_GPIO, motor_0_cw, motor_0_acw);
+Motors::Motor* frontRight = new Motors::OpenLoop(MOTOR_1_PWM_GPIO, motor_1_cw, motor_1_acw);
+Motors::Motor* rearLeft = new Motors::OpenLoop(MOTOR_2_PWM_GPIO, motor_2_cw, motor_2_acw);
+Motors::Motor* rearRight = new Motors::OpenLoop(MOTOR_3_PWM_GPIO, motor_3_cw, motor_3_acw);
 Meccanum drivetrain(&chassis, frontLeft, frontRight, rearLeft, rearRight);
 
 I2cCommandReceiver i2cCommandReceiver(I2C_SLAVE_PORT, &chassis);

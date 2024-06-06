@@ -5,7 +5,7 @@ namespace ControlPins
     class ControlPin;
 };
 
-class ControlPin
+class ControlPins::ControlPin
 {
 public:
 
@@ -15,5 +15,5 @@ public:
         Low = false,
     };
 
-    virtual PinState GetPinstate() const = 0;
+    virtual void SetPinState(PinState newPinState) = 0;
 };

@@ -1,5 +1,6 @@
 #pragma once
 #include "motor.h"
+#include "../control/controlPin.h"
 
 namespace Motors
 {
@@ -10,17 +11,11 @@ class Motors::OpenLoop : public virtual Motors::Motor
 {
 public:
 
-    enum class Orientation
-    {
-        clockwise,
-        anticlockwise
-    };
-
     int _pwm_gpio;
-    int _direction_gpio;
-    Orientation _orientation;
+    ControlPins::ControlPin* _clockwisePin = nullptr;
+    ControlPins::ControlPin* _antiClockwisePin = nullptr;
 
-    OpenLoop(int pwm_gpio, int direction_gpio, Orientation orientation);
+    OpenLoop(int pwm_gpio, ControlPins::ControlPin* clockwisePin, ControlPins::ControlPin* antiClockwisePin);
     void set_speed(int speed_in_percent) override;
 
 private:
