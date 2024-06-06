@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
+
 #include <hardware/i2c.h>
 #include <hardware/uart.h>
 #include <pico/stdlib.h>
@@ -11,6 +13,8 @@
 #include "meccanum.h"
 #include "i2cCommandReceiver/i2cCommandReceiver.h"
 #include "i2cMultiplexer/i2cMultiplexer.h"
+
+#include <time.h>
 
 #define I2C_SLAVE_PORT i2c0
 #define I2C_MASTER_PORT i2c1
@@ -44,11 +48,15 @@ Chassis chassis(chassis_timeout_ms);
 
 
 #define I2C_MASTER_DATA_PIN 2
-#define I2C_MASTER_MOTOR_0_CLOCK_PIN 19 // 3
+#define I2C_MASTER_MOTOR_0_CLOCK_PIN 3
 #define I2C_MASTER_MOTOR_1_CLOCK_PIN 7
 #define I2C_MASTER_MOTOR_2_CLOCK_PIN 11
 #define I2C_MASTER_MOTOR_3_CLOCK_PIN 15
-#define I2C_MASTER_AUX_CLOCK_PIN 3 // 19
+#define I2C_MASTER_AUX_CLOCK_PIN 19
+
+I2cMultiplexer i2cMultiplexer(I2C_MASTER_PORT, I2C_MASTER_DATA_PIN);
+I2cMultiplexedChannel* i2cExtenderChannel = nullptr;
+I2cMultiplexedChannel* i2cMotorChannels[4];
 
 Motors::Motor* frontLeft = new Motors::OpenLoop(MOTOR_0_PWM_GPIO, MOTOR_0_DIRECTION_GPIO, Motors::OpenLoop::Orientation::anticlockwise);
 Motors::Motor* frontRight = new Motors::OpenLoop(MOTOR_1_PWM_GPIO, MOTOR_1_DIRECTION_GPIO, Motors::OpenLoop::Orientation::clockwise);
@@ -99,22 +107,7 @@ void create_multiplexer_channels(I2cMultiplexer* i2cMultiplexer, I2cMultiplexedC
 
 void i2c_multiplexer_init()
 {
-    I2cMultiplexedChannel* i2cExtenderChannel = nullptr;
-    I2cMultiplexedChannel* i2cMotorChannels[4];
-
-    I2cMultiplexer i2cMultiplexer(I2C_MASTER_PORT, I2C_MASTER_DATA_PIN);
     create_multiplexer_channels(&i2cMultiplexer, i2cExtenderChannel, i2cMotorChannels);
-    
-    uint8_t write_buffer[2];
-    int read;
-
-    write_buffer[0] = 0x00;
-    write_buffer[1] = 0x00;
-    read = i2cExtenderChannel->i2c_write_blocking(0x20, write_buffer, 2, true);
-
-    write_buffer[0] = 0x12;
-    write_buffer[1] = 0xff;
-    read = i2cExtenderChannel->i2c_write_blocking(0x20, write_buffer, 2, true);
 };
 
 int main()
@@ -122,24 +115,6 @@ int main()
     stdio_init_all();
     status_indicator_init();
     i2c_multiplexer_init();
-
-    // i2c_init(I2C_MASTER_PORT, 100000);
-    // gpio_set_function(I2C_MASTER_DATA_PIN, GPIO_FUNC_I2C);
-    // gpio_pull_up(I2C_MASTER_DATA_PIN);
-    // gpio_set_function(I2C_MASTER_AUX_CLOCK_PIN, GPIO_FUNC_I2C);
-    // gpio_pull_up(I2C_MASTER_AUX_CLOCK_PIN);
-
-    // uint8_t val[2];
-
-    // val[0] = 0x00;
-    // val[1] = 0x00;
-    // i2c_write_blocking(I2C_MASTER_PORT, 0x20, val, 2, false);
-
-    // val[0] = 0x12;
-    // val[1] = 0x00;
-    // i2c_write_blocking(I2C_MASTER_PORT, 0x20, val, 2, false);
-
-
     i2cCommandReceiver.command_receiver_init(I2C_SLAVE_SDA_PIN, I2C_SLAVE_SCL_PIN, I2C_SLAVE_BAUDRATE, I2C_SLAVE_ADDRESS);
 
     // uart_init(uart0, 115200);
