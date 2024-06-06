@@ -10,6 +10,6 @@ private:
 
 public:
     I2cMultiplexedChannel(I2cMultiplexer* multiplexer, int clock_pin);
-    void i2c_write_blocking();
-    void i2c_read_blocking();
+    int i2c_read_blocking(uint8_t addr, uint8_t *dst, size_t len, bool nostop);
+    int i2c_write_blocking(uint8_t addr, const uint8_t *src, size_t len, bool nostop);
 };
