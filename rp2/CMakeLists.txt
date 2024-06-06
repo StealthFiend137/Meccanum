@@ -31,6 +31,8 @@ add_subdirectory(motors)
 add_subdirectory(chassis)
 add_subdirectory(i2cCommandReceiver)
 add_subdirectory(i2cMultiplexer)
+add_subdirectory(control)
+add_subdirectory(ioExtenders)
 
 
 

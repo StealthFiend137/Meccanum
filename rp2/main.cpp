@@ -34,7 +34,7 @@
 #define MOTOR_3_PWM_GPIO 9
 #define MOTOR_3_DIRECTION_GPIO 13
 
-// I2C
+// Slave I2c (for communication with an external contoller)
 static const uint I2C_SLAVE_SDA_PIN = 16; // Green
 static const uint I2C_SLAVE_SCL_PIN = 17; // Yellow
 static const uint I2C_SLAVE_ADDRESS = 0x17;
@@ -44,8 +44,6 @@ static const uint I2C_SLAVE_BAUDRATE = 100000; // 100 kHz
 //TODO: just to make things even more fun, consider making this timeout configurable.
 uint chassis_timeout_ms = 200;  
 Chassis chassis(chassis_timeout_ms);
-
-
 
 #define I2C_MASTER_DATA_PIN 2
 #define I2C_MASTER_MOTOR_0_CLOCK_PIN 3
