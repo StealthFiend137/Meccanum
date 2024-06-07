@@ -1,4 +1,8 @@
 #pragma once
+
+#define KEEP_CONTROL true
+#define FINISHED_WITH_BUS false
+
 #include <hardware/i2c.h>
 #include "../i2cMultiplexer/i2cMultiplexer.h"
 
@@ -7,8 +11,8 @@ namespace IoExtenders
     class Mcp23017;
 };
 
-#define PORTA = 0x00
-#define PORTB = 0x01
+#define PORTA   0x00
+#define PORTB   0x01
 
 // IOCON.BANK seems to be set to 0 at startup.
 
@@ -33,8 +37,6 @@ namespace IoExtenders
 #define GPIO    0x12   // Data Ports (read the value on the port (pin) input).  READ ONLY, but writing to this register actually updates the OLAT regsiter.
 #define OLAT    0x14   // Output Latch (write to change the port (pin) output)
 
-
-
 class IoExtenders::Mcp23017
 {
 private:
@@ -51,5 +53,6 @@ public:
     };
 
     Mcp23017(I2cMultiplexedChannel* i2c_multiplexed_channel, int i2c_address);
-    void SetPinState(Bank bank, int pinNumber, bool highLow);
+    void set_pin_as_output(Bank bank, uint8_t pinNumber);
+    void set_pin_state(Bank bank, int pinNumber, bool highLow);
 };

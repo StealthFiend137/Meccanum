@@ -15,5 +15,5 @@ public:
         Low = false,
     };
 
-    virtual void SetPinState(PinState newPinState) = 0;
+    virtual void set_pin_state(PinState newPinState) = 0;
 };

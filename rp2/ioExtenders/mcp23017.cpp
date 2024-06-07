@@ -9,7 +9,20 @@ IoExtenders::Mcp23017::Mcp23017(I2cMultiplexedChannel* i2c_multiplexed_channel, 
 {
 };
 
-void IoExtenders::Mcp23017::SetPinState(Bank bank, int pinNumber, bool highLow)
+void IoExtenders::Mcp23017::set_pin_as_output(Bank bank, uint8_t pinNumber)
+{
+    uint8_t registerOffset = (Bank::A == bank) ? PORTA : PORTB;
+    uint8_t address = IODIR + registerOffset;
+    uint8_t read_buffer[1];
+
+    this->_i2c_multiplexed_channel->i2c_write_blocking(_i2c_address, &address, 1, KEEP_CONTROL);
+    this->_i2c_multiplexed_channel->i2c_read_blocking(_i2c_address, read_buffer, 1, FINISHED_WITH_BUS);
+
+    uint8_t buffer[2] { address, (read_buffer[0] & ~pinNumber) };
+    this->_i2c_multiplexed_channel->i2c_write_blocking(_i2c_address, buffer, 2, FINISHED_WITH_BUS);
+};
+
+void IoExtenders::Mcp23017::set_pin_state(Bank bank, int pinNumber, bool highLow)
 {
     // Get the current output register for the specified bank.
     // Bitmask the pin against the new pinstate.

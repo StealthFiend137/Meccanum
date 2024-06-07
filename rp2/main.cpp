@@ -146,10 +146,10 @@ void flash_motors(int ms_since_boot)
 
     motor_flash_state = newstate;
 
-    motor_0_cw->SetPinState(motor_flash_state);
-    motor_0_acw->SetPinState(motor_flash_state);
-    motor_1_cw->SetPinState(motor_flash_state);
-    motor_1_acw->SetPinState(motor_flash_state);
+    motor_0_cw->set_pin_state(motor_flash_state);
+    motor_0_acw->set_pin_state(motor_flash_state);
+    motor_1_cw->set_pin_state(motor_flash_state);
+    motor_1_acw->set_pin_state(motor_flash_state);
 }
 
 int main()

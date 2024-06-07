@@ -18,5 +18,5 @@ private:
 public:
 
     Mcp23017_ControlPin(IoExtenders::Mcp23017* extender, IoExtenders::Mcp23017::Bank bank, int PinNumber);
-    void SetPinState(ControlPins::DigitalControlPin::PinState newPinState) override;
+    void set_pin_state(ControlPins::DigitalControlPin::PinState newPinState) override;
 };

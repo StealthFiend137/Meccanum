@@ -46,8 +46,8 @@ void Motors::OpenLoop::set_speed(int speed_in_percent)
         newAnticlockwisePinState = ControlPins::DigitalControlPin::PinState::High;
     }
 
-    this->_clockwisePin->SetPinState(newClockwisePinState);
-    this->_antiClockwisePin->SetPinState(newAnticlockwisePinState);
+    this->_clockwisePin->set_pin_state(newClockwisePinState);
+    this->_antiClockwisePin->set_pin_state(newAnticlockwisePinState);
 
     int velocity = map_velocity(speed_in_percent);
     pwm_set_gpio_level(this->_pwm_gpio, velocity);
