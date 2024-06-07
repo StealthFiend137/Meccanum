@@ -6,7 +6,8 @@ ControlPins::Mcp23017_ControlPin::Mcp23017_ControlPin(IoExtenders::Mcp23017* ext
     
 };
 
-void ControlPins::Mcp23017_ControlPin::SetPinState(ControlPins::ControlPin::PinState newPinState)
+void ControlPins::Mcp23017_ControlPin::SetPinState(ControlPins::DigitalControlPin::PinState newPinState)
 {
-    //this->_extender->SetPinState(this->_bank, this->_pinNumber);
+    auto highLow = ControlPins::DigitalControlPin::PinState::High == newPinState;
+    this->_extender->SetPinState(this->_bank, this->_pinNumber, highLow);
 };

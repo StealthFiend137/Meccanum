@@ -33,6 +33,10 @@
 #define MOTOR_2_PWM_GPIO 8
 #define MOTOR_3_PWM_GPIO 9
 
+
+int movementIntervalStartTime = to_ms_since_boot(get_absolute_time());
+
+
 // Slave I2c (for communication with an external contoller)
 static const uint I2C_SLAVE_SDA_PIN = 16; // Green
 static const uint I2C_SLAVE_SCL_PIN = 17; // Yellow
@@ -44,34 +48,58 @@ static const uint I2C_SLAVE_BAUDRATE = 100000; // 100 kHz
 uint chassis_timeout_ms = 200;  
 Chassis chassis(chassis_timeout_ms);
 
+
 // I2C Master channel setup
 // ============================================================================
 
 #define I2C_MASTER_DATA_PIN 2
+
+I2cMultiplexer i2cMultiplexer(I2C_MASTER_PORT, I2C_MASTER_DATA_PIN);
+
+
+// Motor rotation sensors
+// ============================================================================
+
 #define I2C_MASTER_MOTOR_0_CLOCK_PIN 3
 #define I2C_MASTER_MOTOR_1_CLOCK_PIN 7
 #define I2C_MASTER_MOTOR_2_CLOCK_PIN 11
 #define I2C_MASTER_MOTOR_3_CLOCK_PIN 15
+
+I2cMultiplexedChannel* _motors[4]
+{
+    i2cMultiplexer.create_channel(I2C_MASTER_MOTOR_0_CLOCK_PIN),
+    i2cMultiplexer.create_channel(I2C_MASTER_MOTOR_1_CLOCK_PIN),
+    i2cMultiplexer.create_channel(I2C_MASTER_MOTOR_2_CLOCK_PIN),
+    i2cMultiplexer.create_channel(I2C_MASTER_MOTOR_3_CLOCK_PIN),
+};
+
+
+// Auxiliary i2c master
+// ============================================================================
+
 #define I2C_MASTER_AUX_CLOCK_PIN 19
 
-I2cMultiplexer i2cMultiplexer(I2C_MASTER_PORT, I2C_MASTER_DATA_PIN);
-I2cMultiplexedChannel* i2cExtenderChannel = nullptr;
-I2cMultiplexedChannel* i2cMotorChannels[4];
+I2cMultiplexedChannel* auxiliary_i2c_channel = i2cMultiplexer.create_channel(I2C_MASTER_AUX_CLOCK_PIN);
+IoExtenders::Mcp23017 mcp23017(auxiliary_i2c_channel, 0x20);
 
-IoExtenders::Mcp23017 mcp23017(I2C_MASTER_PORT, 0x20);
 
-ControlPins::ControlPin* motor_0_cw = new ControlPins::Mcp23017_ControlPin(&mcp23017, IoExtenders::Mcp23017::Bank::A, 1);
-ControlPins::ControlPin* motor_0_acw = new ControlPins::Mcp23017_ControlPin(&mcp23017, IoExtenders::Mcp23017::Bank::A, 2);
-ControlPins::ControlPin* motor_1_cw = new ControlPins::Mcp23017_ControlPin(&mcp23017, IoExtenders::Mcp23017::Bank::A, 3);
-ControlPins::ControlPin* motor_1_acw = new ControlPins::Mcp23017_ControlPin(&mcp23017, IoExtenders::Mcp23017::Bank::A, 4);
-ControlPins::ControlPin* motor_2_cw = new ControlPins::Mcp23017_ControlPin(&mcp23017, IoExtenders::Mcp23017::Bank::A, 5);
-ControlPins::ControlPin* motor_2_acw = new ControlPins::Mcp23017_ControlPin(&mcp23017, IoExtenders::Mcp23017::Bank::A, 6);
-ControlPins::ControlPin* motor_3_cw = new ControlPins::Mcp23017_ControlPin(&mcp23017, IoExtenders::Mcp23017::Bank::A, 7);
-ControlPins::ControlPin* motor_3_acw = new ControlPins::Mcp23017_ControlPin(&mcp23017, IoExtenders::Mcp23017::Bank::A, 8);
+// Motor driver control pins
+// ============================================================================
 
-ControlPins::ControlPin* motor_driver_0_enable = new ControlPins::Mcp23017_ControlPin(&mcp23017, IoExtenders::Mcp23017::Bank::B, 1);
-ControlPins::ControlPin* motor_driver_1_enable = new ControlPins::Mcp23017_ControlPin(&mcp23017, IoExtenders::Mcp23017::Bank::B, 2);
+ControlPins::DigitalControlPin* motor_0_cw = new ControlPins::Mcp23017_ControlPin(&mcp23017, IoExtenders::Mcp23017::Bank::A, 1);
+ControlPins::DigitalControlPin* motor_0_acw = new ControlPins::Mcp23017_ControlPin(&mcp23017, IoExtenders::Mcp23017::Bank::A, 2);
+ControlPins::DigitalControlPin* motor_1_cw = new ControlPins::Mcp23017_ControlPin(&mcp23017, IoExtenders::Mcp23017::Bank::A, 3);
+ControlPins::DigitalControlPin* motor_1_acw = new ControlPins::Mcp23017_ControlPin(&mcp23017, IoExtenders::Mcp23017::Bank::A, 4);
+ControlPins::DigitalControlPin* motor_2_cw = new ControlPins::Mcp23017_ControlPin(&mcp23017, IoExtenders::Mcp23017::Bank::A, 5);
+ControlPins::DigitalControlPin* motor_2_acw = new ControlPins::Mcp23017_ControlPin(&mcp23017, IoExtenders::Mcp23017::Bank::A, 6);
+ControlPins::DigitalControlPin* motor_3_cw = new ControlPins::Mcp23017_ControlPin(&mcp23017, IoExtenders::Mcp23017::Bank::A, 7);
+ControlPins::DigitalControlPin* motor_3_acw = new ControlPins::Mcp23017_ControlPin(&mcp23017, IoExtenders::Mcp23017::Bank::A, 8);
 
+ControlPins::DigitalControlPin* motor_driver_0_enable = new ControlPins::Mcp23017_ControlPin(&mcp23017, IoExtenders::Mcp23017::Bank::B, 1);
+ControlPins::DigitalControlPin* motor_driver_1_enable = new ControlPins::Mcp23017_ControlPin(&mcp23017, IoExtenders::Mcp23017::Bank::B, 2);
+
+
+// OPen loop motor controllers
 // ============================================================================
 
 Motors::Motor* frontLeft = new Motors::OpenLoop(MOTOR_0_PWM_GPIO, motor_0_cw, motor_0_acw);
@@ -80,10 +108,13 @@ Motors::Motor* rearLeft = new Motors::OpenLoop(MOTOR_2_PWM_GPIO, motor_2_cw, mot
 Motors::Motor* rearRight = new Motors::OpenLoop(MOTOR_3_PWM_GPIO, motor_3_cw, motor_3_acw);
 Meccanum drivetrain(&chassis, frontLeft, frontRight, rearLeft, rearRight);
 
+
+// Slave i2c (for receiving communcation and instructions)
+// ============================================================================
 I2cCommandReceiver i2cCommandReceiver(I2C_SLAVE_PORT, &chassis);
 
-int movementIntervalStartTime = to_ms_since_boot(get_absolute_time());
-int modifiedRegisterCount;
+// 
+// ============================================================================
 
 void status_indicator_init()
 {
@@ -107,30 +138,24 @@ void action_movement(int ms_since_boot)
     drivetrain.action_updates();
 };
 
-void create_multiplexer_channels(I2cMultiplexer* i2cMultiplexer, I2cMultiplexedChannel*& extender, I2cMultiplexedChannel** motors)
+auto motor_flash_state = ControlPins::DigitalControlPin::PinState::Low;
+void flash_motors(int ms_since_boot)
 {
-    extender = i2cMultiplexer->create_channel(I2C_MASTER_AUX_CLOCK_PIN);
-    I2cMultiplexedChannel* _motors[4] =
-    {
-        i2cMultiplexer->create_channel(I2C_MASTER_MOTOR_0_CLOCK_PIN),
-        i2cMultiplexer->create_channel(I2C_MASTER_MOTOR_1_CLOCK_PIN),
-        i2cMultiplexer->create_channel(I2C_MASTER_MOTOR_2_CLOCK_PIN),
-        i2cMultiplexer->create_channel(I2C_MASTER_MOTOR_3_CLOCK_PIN)
-    };
+    ControlPins::DigitalControlPin::PinState newstate = ((ms_since_boot % 2000) < 1000) ? ControlPins::DigitalControlPin::PinState::Low : ControlPins::DigitalControlPin::PinState::High;
+    if (newstate == motor_flash_state) return;
 
-    motors = _motors;
-};
+    motor_flash_state = newstate;
 
-void i2c_multiplexer_init()
-{
-    create_multiplexer_channels(&i2cMultiplexer, i2cExtenderChannel, i2cMotorChannels);
-};
+    motor_0_cw->SetPinState(motor_flash_state);
+    motor_0_acw->SetPinState(motor_flash_state);
+    motor_1_cw->SetPinState(motor_flash_state);
+    motor_1_acw->SetPinState(motor_flash_state);
+}
 
 int main()
 {
     stdio_init_all();
     status_indicator_init();
-    i2c_multiplexer_init();
     i2cCommandReceiver.command_receiver_init(I2C_SLAVE_SDA_PIN, I2C_SLAVE_SCL_PIN, I2C_SLAVE_BAUDRATE, I2C_SLAVE_ADDRESS);
 
     // uart_init(uart0, 115200);
@@ -144,6 +169,7 @@ int main()
         auto ms_since_boot = to_ms_since_boot(get_absolute_time());
         indicate_status(ms_since_boot);
         action_movement(ms_since_boot);
+        flash_motors(ms_since_boot);      
 
         // if(uart_is_readable(uart0))
         // {
@@ -152,20 +178,5 @@ int main()
         // }
     }
 
-    /*
-    delete frontLeft;
-    frontLeft = nullptr;
-
-    delete frontRight;
-    frontRight = nullptr;
-
-    delete rearLeft;
-    rearLeft = nullptr;
-
-    delete rearRight;
-    rearRight = nullptr;
-
-    delete extended_io_channel;
-    extended_io_channel = nullptr;
-    */
+    // Delete of objects omited as this program has no exit condition.
 };

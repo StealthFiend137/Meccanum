@@ -7,7 +7,7 @@ namespace ControlPins
     class Mcp23017_ControlPin;
 };
 
-class ControlPins::Mcp23017_ControlPin : public virtual ControlPins::ControlPin
+class ControlPins::Mcp23017_ControlPin : public virtual ControlPins::DigitalControlPin
 {
 private:
 
@@ -18,5 +18,5 @@ private:
 public:
 
     Mcp23017_ControlPin(IoExtenders::Mcp23017* extender, IoExtenders::Mcp23017::Bank bank, int PinNumber);
-    void SetPinState(ControlPins::ControlPin::PinState newPinState) override;
+    void SetPinState(ControlPins::DigitalControlPin::PinState newPinState) override;
 };

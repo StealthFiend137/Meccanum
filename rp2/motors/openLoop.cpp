@@ -5,7 +5,7 @@
 #include "hardware/pwm.h"
 #include "openLoop.h"
 
-Motors::OpenLoop::OpenLoop(int pwm_gpio, ControlPins::ControlPin* clockwisePin, ControlPins::ControlPin* antiClockwisePin):
+Motors::OpenLoop::OpenLoop(int pwm_gpio, ControlPins::DigitalControlPin* clockwisePin, ControlPins::DigitalControlPin* antiClockwisePin):
     _pwm_gpio(pwm_gpio), _clockwisePin(clockwisePin), _antiClockwisePin(antiClockwisePin)
 {
     gpio_set_function(pwm_gpio, GPIO_FUNC_PWM);
@@ -34,16 +34,16 @@ bool Motors::OpenLoop::get_direction(int percent)
 void Motors::OpenLoop::set_speed(int speed_in_percent)
 {
     // bool direction = get_direction(speed_in_percent);
-    auto newClockwisePinState = ControlPins::ControlPin::PinState::Low;
-    auto newAnticlockwisePinState = ControlPins::ControlPin::PinState::Low;
+    auto newClockwisePinState = ControlPins::DigitalControlPin::PinState::Low;
+    auto newAnticlockwisePinState = ControlPins::DigitalControlPin::PinState::Low;
 
     if(speed_in_percent > 0)
     {
-        newClockwisePinState = ControlPins::ControlPin::PinState::High;
+        newClockwisePinState = ControlPins::DigitalControlPin::PinState::High;
     }
     else
     {
-        newAnticlockwisePinState = ControlPins::ControlPin::PinState::High;
+        newAnticlockwisePinState = ControlPins::DigitalControlPin::PinState::High;
     }
 
     this->_clockwisePin->SetPinState(newClockwisePinState);

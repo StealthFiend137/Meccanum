@@ -12,10 +12,10 @@ class Motors::OpenLoop : public virtual Motors::Motor
 public:
 
     int _pwm_gpio;
-    ControlPins::ControlPin* _clockwisePin = nullptr;
-    ControlPins::ControlPin* _antiClockwisePin = nullptr;
+    ControlPins::DigitalControlPin* _clockwisePin = nullptr;
+    ControlPins::DigitalControlPin* _antiClockwisePin = nullptr;
 
-    OpenLoop(int pwm_gpio, ControlPins::ControlPin* clockwisePin, ControlPins::ControlPin* antiClockwisePin);
+    OpenLoop(int pwm_gpio, ControlPins::DigitalControlPin* clockwisePin, ControlPins::DigitalControlPin* antiClockwisePin);
     void set_speed(int speed_in_percent) override;
 
 private:

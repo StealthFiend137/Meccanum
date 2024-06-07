@@ -2,10 +2,10 @@
 
 namespace ControlPins
 {
-    class ControlPin;
+    class DigitalControlPin;
 };
 
-class ControlPins::ControlPin
+class ControlPins::DigitalControlPin
 {
 public:
 

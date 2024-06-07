@@ -1,5 +1,6 @@
 #pragma once
 #include <hardware/i2c.h>
+#include "../i2cMultiplexer/i2cMultiplexer.h"
 
 namespace IoExtenders
 {
@@ -11,7 +12,7 @@ class IoExtenders::Mcp23017
 private:
 
     int _i2c_address;
-    i2c_inst_t* _i2c_instance;
+    I2cMultiplexedChannel* _i2c_multiplexed_channel;
 
 public:
 
@@ -21,6 +22,6 @@ public:
         B,
     };
 
-    Mcp23017(i2c_inst_t* i2c_instance, int i2c_address);
-    //void SetPinState(Bank bank, int pinNumber);
+    Mcp23017(I2cMultiplexedChannel* i2c_multiplexed_channel, int i2c_address);
+    void SetPinState(Bank bank, int pinNumber, bool highLow);
 };
