@@ -15,7 +15,13 @@ void IoExtenders::Mcp23017::SetPinState(Bank bank, int pinNumber, bool highLow)
     // Bitmask the pin against the new pinstate.
     // Write the new pinstate (unless it's already correct)
 
-    uint8_t buffer[1];
-    this->_i2c_multiplexed_channel->i2c_write_blocking(_i2c_address, buffer, 1, false);
+    uint8_t buffer[2];
+    buffer[0] = 0x00;
+    buffer[1] = 0x00;
+    this->_i2c_multiplexed_channel->i2c_write_blocking(_i2c_address, buffer, 2, false);
+
+    buffer[0] = 0x12;
+    buffer[1] = highLow ? 0x00 : 0xff;
+    this->_i2c_multiplexed_channel->i2c_write_blocking(_i2c_address, buffer, 2, false);
     printf("Register state %u\n", buffer[0]);
 };
