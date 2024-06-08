@@ -20,9 +20,13 @@ GPIO =    0x12 # Data Ports (read the value on the port (pin) input)
 OLAT =    0x14
 
 
-#bus.write_byte_data(chassis_address, IODIR+A, 0xff)
-#bus.write_byte_data(chassis_address, IODIR+B, 0xff)
-
+reset = False
+#reset = True
+if reset:
+    bus.write_byte_data(chassis_address, IODIR+A, 0xff)
+    bus.write_byte_data(chassis_address, IODIR+B, 0xff)
+    bus.write_byte_data(chassis_address, OLAT+A, 0x00)
+    bus.write_byte_data(chassis_address, OLAT+B, 0x00)
 
 
 #bus.write_byte_data(chassis_address, OLAT+A, 0xff)

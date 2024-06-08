@@ -53,6 +53,6 @@ public:
     };
 
     Mcp23017(I2cMultiplexedChannel* i2c_multiplexed_channel, int i2c_address);
-    void set_pin_as_output(Bank bank, uint8_t pinNumber);
+    void set_pin_as_output(Bank bank, int pinNumber);
     void set_pin_state(Bank bank, int pinNumber, bool highLow);
 };

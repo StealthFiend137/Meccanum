@@ -99,7 +99,7 @@ ControlPins::DigitalControlPin* motor_driver_0_enable = new ControlPins::Mcp2301
 ControlPins::DigitalControlPin* motor_driver_1_enable = new ControlPins::Mcp23017_ControlPin(&mcp23017, IoExtenders::Mcp23017::Bank::B, 2);
 
 
-// OPen loop motor controllers
+// Open loop motor controllers
 // ============================================================================
 
 Motors::Motor* frontLeft = new Motors::OpenLoop(MOTOR_0_PWM_GPIO, motor_0_cw, motor_0_acw);
@@ -112,6 +112,7 @@ Meccanum drivetrain(&chassis, frontLeft, frontRight, rearLeft, rearRight);
 // Slave i2c (for receiving communcation and instructions)
 // ============================================================================
 I2cCommandReceiver i2cCommandReceiver(I2C_SLAVE_PORT, &chassis);
+
 
 // 
 // ============================================================================
@@ -138,20 +139,6 @@ void action_movement(int ms_since_boot)
     drivetrain.action_updates();
 };
 
-auto motor_flash_state = ControlPins::DigitalControlPin::PinState::Low;
-void flash_motors(int ms_since_boot)
-{
-    ControlPins::DigitalControlPin::PinState newstate = ((ms_since_boot % 2000) < 1000) ? ControlPins::DigitalControlPin::PinState::Low : ControlPins::DigitalControlPin::PinState::High;
-    if (newstate == motor_flash_state) return;
-
-    motor_flash_state = newstate;
-
-    motor_0_cw->set_pin_state(motor_flash_state);
-    motor_0_acw->set_pin_state(motor_flash_state);
-    motor_1_cw->set_pin_state(motor_flash_state);
-    motor_1_acw->set_pin_state(motor_flash_state);
-}
-
 int main()
 {
     stdio_init_all();
@@ -164,12 +151,14 @@ int main()
 
     printf("\n==========================\nReady\n==========================\n");
 
+
+    motor_0_acw->set_pin_state(ControlPins::DigitalControlPin::PinState::High);
+
     while(true)
     {
         auto ms_since_boot = to_ms_since_boot(get_absolute_time());
         indicate_status(ms_since_boot);
         action_movement(ms_since_boot);
-        flash_motors(ms_since_boot);      
 
         // if(uart_is_readable(uart0))
         // {
@@ -178,5 +167,5 @@ int main()
         // }
     }
 
-    // Delete of objects omited as this program has no exit condition.
+    // Delete of objects ommited as this program has no exit condition.
 };
