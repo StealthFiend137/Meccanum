@@ -2,7 +2,7 @@
 #include "i2cMultiplexedChannel.h"
 #include "pico/stdlib.h"
 
-I2cMultiplexer::I2cMultiplexer(i2c_inst_t* i2c_instance, int data_pin):
+I2cMultiplexer::I2cMultiplexer(i2c_inst_t* i2c_instance, int data_pin, int enable_pin):
     _i2c_instance(i2c_instance), _data_pin(data_pin)
 {
 
@@ -10,6 +10,14 @@ I2cMultiplexer::I2cMultiplexer(i2c_inst_t* i2c_instance, int data_pin):
     
     gpio_set_function(data_pin, GPIO_FUNC_I2C);
     gpio_pull_up(data_pin);
+
+    // Reset the MCP23017 on startup to get is into a known state.
+    gpio_init(enable_pin);
+    gpio_set_dir(enable_pin, GPIO_OUT);
+    gpio_set_outover(enable_pin, GPIO_OVERRIDE_NORMAL);
+    gpio_put(enable_pin, 0);
+    sleep_us(1); // Param #30 
+    gpio_put(enable_pin, 1);
 };
 
 void I2cMultiplexer::switch_clock_pin(int clock_pin)

@@ -53,8 +53,9 @@ Chassis chassis(chassis_timeout_ms);
 // ============================================================================
 
 #define I2C_MASTER_DATA_PIN 2
+#define IO_EXTENDER_ENABLE_PIN 14
 
-I2cMultiplexer i2cMultiplexer(I2C_MASTER_PORT, I2C_MASTER_DATA_PIN);
+I2cMultiplexer i2cMultiplexer(I2C_MASTER_PORT, I2C_MASTER_DATA_PIN, IO_EXTENDER_ENABLE_PIN);
 
 
 // Motor rotation sensors
@@ -87,13 +88,13 @@ IoExtenders::Mcp23017 mcp23017(auxiliary_i2c_channel, 0x20);
 // ============================================================================
 
 ControlPins::DigitalControlPin* motor_0_cw = new ControlPins::Mcp23017_ControlPin(&mcp23017, IoExtenders::Mcp23017::Bank::A, 1);
-ControlPins::DigitalControlPin* motor_0_acw = new ControlPins::Mcp23017_ControlPin(&mcp23017, IoExtenders::Mcp23017::Bank::A, 2);
+ControlPins::DigitalControlPin* motor_0_ccw = new ControlPins::Mcp23017_ControlPin(&mcp23017, IoExtenders::Mcp23017::Bank::A, 2);
 ControlPins::DigitalControlPin* motor_1_cw = new ControlPins::Mcp23017_ControlPin(&mcp23017, IoExtenders::Mcp23017::Bank::A, 3);
-ControlPins::DigitalControlPin* motor_1_acw = new ControlPins::Mcp23017_ControlPin(&mcp23017, IoExtenders::Mcp23017::Bank::A, 4);
+ControlPins::DigitalControlPin* motor_1_ccw = new ControlPins::Mcp23017_ControlPin(&mcp23017, IoExtenders::Mcp23017::Bank::A, 4);
 ControlPins::DigitalControlPin* motor_2_cw = new ControlPins::Mcp23017_ControlPin(&mcp23017, IoExtenders::Mcp23017::Bank::A, 5);
-ControlPins::DigitalControlPin* motor_2_acw = new ControlPins::Mcp23017_ControlPin(&mcp23017, IoExtenders::Mcp23017::Bank::A, 6);
+ControlPins::DigitalControlPin* motor_2_ccw = new ControlPins::Mcp23017_ControlPin(&mcp23017, IoExtenders::Mcp23017::Bank::A, 6);
 ControlPins::DigitalControlPin* motor_3_cw = new ControlPins::Mcp23017_ControlPin(&mcp23017, IoExtenders::Mcp23017::Bank::A, 7);
-ControlPins::DigitalControlPin* motor_3_acw = new ControlPins::Mcp23017_ControlPin(&mcp23017, IoExtenders::Mcp23017::Bank::A, 8);
+ControlPins::DigitalControlPin* motor_3_ccw = new ControlPins::Mcp23017_ControlPin(&mcp23017, IoExtenders::Mcp23017::Bank::A, 8);
 
 ControlPins::DigitalControlPin* motor_driver_0_enable = new ControlPins::Mcp23017_ControlPin(&mcp23017, IoExtenders::Mcp23017::Bank::B, 1);
 ControlPins::DigitalControlPin* motor_driver_1_enable = new ControlPins::Mcp23017_ControlPin(&mcp23017, IoExtenders::Mcp23017::Bank::B, 2);
@@ -102,10 +103,10 @@ ControlPins::DigitalControlPin* motor_driver_1_enable = new ControlPins::Mcp2301
 // Open loop motor controllers
 // ============================================================================
 
-Motors::Motor* frontLeft = new Motors::OpenLoop(MOTOR_0_PWM_GPIO, motor_0_cw, motor_0_acw);
-Motors::Motor* frontRight = new Motors::OpenLoop(MOTOR_1_PWM_GPIO, motor_1_cw, motor_1_acw);
-Motors::Motor* rearLeft = new Motors::OpenLoop(MOTOR_2_PWM_GPIO, motor_2_cw, motor_2_acw);
-Motors::Motor* rearRight = new Motors::OpenLoop(MOTOR_3_PWM_GPIO, motor_3_cw, motor_3_acw);
+Motors::Motor* frontLeft = new Motors::OpenLoop(MOTOR_0_PWM_GPIO, motor_0_cw, motor_0_ccw);
+Motors::Motor* frontRight = new Motors::OpenLoop(MOTOR_1_PWM_GPIO, motor_1_cw, motor_1_ccw);
+Motors::Motor* rearLeft = new Motors::OpenLoop(MOTOR_2_PWM_GPIO, motor_2_cw, motor_2_ccw);
+Motors::Motor* rearRight = new Motors::OpenLoop(MOTOR_3_PWM_GPIO, motor_3_cw, motor_3_ccw);
 Meccanum drivetrain(&chassis, frontLeft, frontRight, rearLeft, rearRight);
 
 
@@ -152,7 +153,7 @@ int main()
     printf("\n==========================\nReady\n==========================\n");
 
 
-    motor_0_acw->set_pin_state(ControlPins::DigitalControlPin::PinState::High);
+    motor_0_ccw->set_pin_state(ControlPins::DigitalControlPin::PinState::High);
 
     while(true)
     {
