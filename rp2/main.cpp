@@ -146,6 +146,9 @@ int main(){
     status_indicator_init();
     i2cCommandReceiver.command_receiver_init(I2C_SLAVE_SDA_PIN, I2C_SLAVE_SCL_PIN, I2C_SLAVE_BAUDRATE, I2C_SLAVE_ADDRESS);
 
+    motor_driver_0_enable->set_pin_state(ControlPins::DigitalControlPin::PinState::High);
+    motor_driver_1_enable->set_pin_state(ControlPins::DigitalControlPin::PinState::High);
+
     // uart_init(uart0, 115200);
     // gpio_set_function(0, GPIO_FUNC_UART);
     // gpio_set_function(1, GPIO_FUNC_UART);
