@@ -12,7 +12,7 @@
 //     AxisState wAxis{0, 7000};
 // };
 
-/// @brief Creates a new instance of the Chassis class.
+/// @brief Creates a new instance of the Chassis class.  The chassis is essentially a broker betwene the command receiver and any other interested parties such as the drive train.
 /// @param comamnd_timeout_ms The timeout in ms before items return to their default state.
 Chassis::Chassis(const uint command_timeout_ms) :
     wAxis(0, command_timeout_ms),

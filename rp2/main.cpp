@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+#include <hardware/pwm.h>
 
 #include <hardware/i2c.h>
 #include <hardware/uart.h>
@@ -140,8 +141,7 @@ void action_movement(int ms_since_boot)
     drivetrain.action_updates();
 };
 
-int main()
-{
+int main(){
     stdio_init_all();
     status_indicator_init();
     i2cCommandReceiver.command_receiver_init(I2C_SLAVE_SDA_PIN, I2C_SLAVE_SCL_PIN, I2C_SLAVE_BAUDRATE, I2C_SLAVE_ADDRESS);
@@ -151,9 +151,6 @@ int main()
     // gpio_set_function(1, GPIO_FUNC_UART);
 
     printf("\n==========================\nReady\n==========================\n");
-
-
-    motor_0_ccw->set_pin_state(ControlPins::DigitalControlPin::PinState::High);
 
     while(true)
     {

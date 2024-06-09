@@ -37,8 +37,19 @@ chassis_address = 0x17;
 #b = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19] # there are 19
 #bus.write_i2c_block_data(chassis_address, 0x00, b)
 
-xUpdate = [100, 0, 0]
-bus.write_i2c_block_data(chassis_address, WDIR, xUpdate)
+def set_speed(num):
+    xUpdate = [0, num, 0]
+    bus.write_i2c_block_data(chassis_address, WDIR, xUpdate)
+    time.sleep(0.2)
+
+while True:
+    set_speed(100);
+
+
+#set_speed(75);
+#set_speed(50);
+#set_speed(25);
+#set_speed(100);
 
 #time.sleep(0.01)
 #adr = bus.read_i2c_block_data(chassis_address, DUTY0, 20)

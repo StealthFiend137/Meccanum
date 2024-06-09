@@ -3,13 +3,27 @@
 #include <cmath>
 #include <algorithm>
 
+/// @brief Initializes a new intance of the Meccanum class.
+/// @param chassis 
+/// @param frontLeft 
+/// @param frontRight 
+/// @param rearLeft 
+/// @param rearRight 
 Meccanum::Meccanum(Chassis* chassis, Motors::Motor* frontLeft, Motors::Motor* frontRight, Motors::Motor* rearLeft, Motors::Motor* rearRight):
     _chassis(chassis), _frontLeft(frontLeft), _frontRight(frontRight), _rearLeft(rearLeft), _rearRight(rearRight)
 {
     chassis->register_callback(update_callback);
+
+    frontLeft->set_speed(0);
+    frontRight->set_speed(0);
+    rearLeft->set_speed(0);
+    rearRight->set_speed(0);
+
     Meccanum::_instance = this;
 };
 
+/// @brief 
+/// @param modified 
 void Meccanum::update_callback(Chassis::Modified modified)
 {
     Meccanum::_instance->update_values(modified);
@@ -21,17 +35,17 @@ void Meccanum::update_values(Chassis::Modified modified)
 
     if((modified & Chassis::Modified::wAxisModified) == Chassis::Modified::wAxisModified)
     {
-        wAxis_new = this->_chassis->get_w_axis();
+        this->wAxis_new = this->_chassis->get_w_axis();
     };
 
     if((modified & Chassis::Modified::xAxisModified) == Chassis::Modified::xAxisModified)
     {
-        xAxis_new = this->_chassis->get_x_axis();
+        this->xAxis_new = this->_chassis->get_x_axis();
     };
 
     if((modified & Chassis::Modified::yAxisModified) == Chassis::Modified::yAxisModified)
     {
-        yAxis_new = this->_chassis->get_y_axis();
+        this->yAxis_new = this->_chassis->get_y_axis();
     };
 };
 

@@ -1,9 +1,12 @@
 #include <hardware/gpio.h>
 #include <pico/time.h>
 
-#include "i2cCommandReceiver.h"
 #include "registers.h"
+#include "i2cCommandReceiver.h"
 
+/// @brief Initializes a new instance of the I2cCommandReceiver class.
+/// @param i2c The I2C instance. Must be configured as a slave and already connected.
+/// @param chassis The instance of the chassis.
 I2cCommandReceiver::I2cCommandReceiver(i2c_inst_t* i2c, Chassis* chassis)
 {
     this->_i2c_instance = i2c;
@@ -12,39 +15,14 @@ I2cCommandReceiver::I2cCommandReceiver(i2c_inst_t* i2c, Chassis* chassis)
     I2cCommandReceiver::_instance = this;
 };
 
-void I2cCommandReceiver::update_notification_callback(Chassis::Modified modified)
-{
-    I2cCommandReceiver::_instance->update_notification(modified);
-};
-
-void I2cCommandReceiver::update_notification(Chassis::Modified modified)
-{
-};
-
-void I2cCommandReceiver::ValuesUpdated(UpdatedValues updatedValues)
-{
-};
-
-void I2cCommandReceiver::command_receiver_init(uint sda_pin, uint scl_pin, uint baudrate, uint8_t slave_address)
-{
-    gpio_init(sda_pin);
-    gpio_pull_up(sda_pin);
-    gpio_set_function(sda_pin, GPIO_FUNC_I2C);
-
-    gpio_init(scl_pin);
-    gpio_pull_up(scl_pin);
-    gpio_set_function(scl_pin, GPIO_FUNC_I2C);
-    
-    i2c_init(_i2c_instance, baudrate);
-    i2c_slave_init(_i2c_instance, slave_address, i2c_slave_isr);
-
-};
-
+/// @brief The Interrupt Service Routine that is invoked when the slave I2C bus receives data.
+/// @param i2c The I2C bus that received a message.
+/// @param event The details of the message/event that triggered this event.
 void I2cCommandReceiver::i2c_slave_isr(i2c_inst_t *i2c, i2c_slave_event_t event)
 {
     switch (event)
     {
-        case I2C_SLAVE_RECEIVE: // master has initiated a connection
+        case I2C_SLAVE_RECEIVE: // master has sent a byte.
             if(!I2cCommandReceiver::_instance->_i2c_buffer.is_open()) // reads and writes always start with the memory address
             {
                 uint8_t address = i2c_read_byte_raw(i2c);
@@ -73,6 +51,28 @@ void I2cCommandReceiver::i2c_slave_isr(i2c_inst_t *i2c, i2c_slave_event_t event)
         default:
             break;
     }
+};
+
+/// @brief 
+/// @param modified 
+void I2cCommandReceiver::update_notification_callback(Chassis::Modified modified)
+{
+    I2cCommandReceiver::_instance->update_notification(modified);
+};
+
+void I2cCommandReceiver::command_receiver_init(uint sda_pin, uint scl_pin, uint baudrate, uint8_t slave_address)
+{
+    gpio_init(sda_pin);
+    gpio_pull_up(sda_pin);
+    gpio_set_function(sda_pin, GPIO_FUNC_I2C);
+
+    gpio_init(scl_pin);
+    gpio_pull_up(scl_pin);
+    gpio_set_function(scl_pin, GPIO_FUNC_I2C);
+    
+    i2c_init(_i2c_instance, baudrate);
+    i2c_slave_init(_i2c_instance, slave_address, i2c_slave_isr);
+
 };
 
 bool I2cCommandReceiver::get_if_register_modified(I2cBuffer::ModifiedRegisters effectedRegister)
@@ -126,4 +126,12 @@ void I2cCommandReceiver::commit_buffer()
         auto yAxisValue = (int8_t)GetValueByAddress(YDIR, this->_i2c_buffer._addresses, this->_i2c_buffer._data);
         this->_chassis->set_y_axis(yAxisModified);
     }
+};
+
+void I2cCommandReceiver::update_notification(Chassis::Modified modified)
+{
+};
+
+void I2cCommandReceiver::ValuesUpdated(UpdatedValues updatedValues)
+{
 };

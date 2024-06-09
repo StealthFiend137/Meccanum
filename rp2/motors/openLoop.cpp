@@ -1,29 +1,36 @@
-#include <cstdio>
 #include <cmath>
 #include "pico/stdlib.h"
 #include "hardware/gpio.h"
 #include "hardware/pwm.h"
 #include "openLoop.h"
 
+#include <cstdio>
+
+static void ConfigurePinForPwm(int pinNumber)
+{
+    uint slice_num = ::pwm_gpio_to_slice_num(pinNumber);   
+    pwm_config config = ::pwm_get_default_config();
+    ::pwm_config_set_clkdiv(&config, 4.f);
+    ::pwm_init(slice_num, &config, true);
+};
+
 Motors::OpenLoop::OpenLoop(int pwm_gpio, ControlPins::DigitalControlPin* clockwisePin, ControlPins::DigitalControlPin* antiClockwisePin):
     _pwm_gpio(pwm_gpio), _clockwisePin(clockwisePin), _antiClockwisePin(antiClockwisePin)
 {
-    gpio_set_function(pwm_gpio, GPIO_FUNC_PWM);
-    uint slice_num = pwm_gpio_to_slice_num(pwm_gpio);
-    pwm_config config = pwm_get_default_config();
-    pwm_init(slice_num, &config, true);
-    pwm_set_gpio_level(pwm_gpio, 0);
+    ConfigurePinForPwm(pwm_gpio);
 };
 
 int Motors::OpenLoop::map_velocity(int percent)
 {
-    const int inputMin = -100;
+    const int inputMin = 0;
     const int inputMax = 100;
-    const int outputMin = -255;
-    const int outputMax = 255;
+    const int outputMin = 0;
+    const int outputMax = UINT16_MAX;
+
+    int inputSpeed = ::abs(percent);
 
     int velocity = outputMin + (percent - inputMin) * (outputMax - outputMin) / (inputMax - inputMin);
-    return abs(velocity);
+    return ::abs(velocity);
 };
 
 bool Motors::OpenLoop::get_direction(int percent)
@@ -33,7 +40,6 @@ bool Motors::OpenLoop::get_direction(int percent)
 
 void Motors::OpenLoop::set_speed(int speed_in_percent)
 {
-    // bool direction = get_direction(speed_in_percent);
     auto newClockwisePinState = ControlPins::DigitalControlPin::PinState::Low;
     auto newAnticlockwisePinState = ControlPins::DigitalControlPin::PinState::Low;
 
@@ -50,5 +56,10 @@ void Motors::OpenLoop::set_speed(int speed_in_percent)
     this->_antiClockwisePin->set_pin_state(newAnticlockwisePinState);
 
     int velocity = map_velocity(speed_in_percent);
-    pwm_set_gpio_level(this->_pwm_gpio, velocity);
+
+
+    printf("velocity: %d\n", velocity);
+
+    ::gpio_set_function(this->_pwm_gpio, GPIO_FUNC_PWM);
+    ::pwm_set_gpio_level(this->_pwm_gpio, velocity);
 };
