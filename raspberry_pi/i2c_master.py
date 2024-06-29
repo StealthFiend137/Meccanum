@@ -38,7 +38,7 @@ chassis_address = 0x17;
 #bus.write_i2c_block_data(chassis_address, 0x00, b)
 
 def set_speed(num):
-    xUpdate = [0, num, 0]
+    xUpdate = [0, 0, num]
     bus.write_i2c_block_data(chassis_address, WDIR, xUpdate)
     time.sleep(0.2)
 
