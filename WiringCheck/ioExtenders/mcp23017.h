@@ -39,10 +39,17 @@ namespace IoExtenders
 
 class IoExtenders::Mcp23017
 {
+public:
+    enum class Bank;
+    enum class IoPin : int;
+    enum class IoPinOutputState : bool;
+
 private:
 
     int _i2c_address;
     I2cMultiplexedChannel* _i2c_multiplexed_channel;
+
+    void get_bank_and_number(const IoPin pin, Bank& bank, int& pinNumber);
 
 public:
 
@@ -52,7 +59,40 @@ public:
         B,
     };
 
+    enum class IoPin : int
+    {
+        GPA0 = 21,
+        GPA1 = 22,
+        GPA2 = 23,
+        GPA3 = 24,
+        GPA4 = 25,
+        GPA5 = 26,
+        GPA6 = 27,
+        GPA7 = 28,
+        
+        GPB0 = 1,
+        GPB1 = 2,
+        GPB2 = 3,
+        GPB3 = 4,
+        GPB4 = 5,
+        GPB5 = 6,
+        GPB6 = 7,
+        GPB7 = 8
+    };
+
+    enum class IoPinOutputState : bool
+    {
+        low = false,
+        high = true
+    };
+
     Mcp23017(I2cMultiplexedChannel* i2c_multiplexed_channel, int i2c_address);
+
+
+
     void set_pin_as_output(Bank bank, int pinNumber);
+    void set_pin_as_output(IoPin pin);
+
     void set_pin_state(Bank bank, int pinNumber, bool highLow);
+    void set_pin_state(const IoPin pin, const IoPinOutputState state);
 };

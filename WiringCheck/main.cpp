@@ -8,25 +8,25 @@
 #include "ioExtenders/mcp23017.h"
 #include "ioExtenders/mcp23017_ControlPin.h"
 
-#define MOTOR0_PWM_PIN 4 // PICO_DEFAULT_LED_PIN
-#define MOTOR0_FORWARD_PIN 0
-#define MOTOR0_REVERSE_PIN 1
+#define DRIVER0_ENABLE_PIN IoExtenders::Mcp23017::IoPin::GPB0
+
+#define MOTOR0_PWM_PIN 4
+#define MOTOR0_FORWARD_PIN IoExtenders::Mcp23017::IoPin::GPA0
+#define MOTOR0_REVERSE_PIN IoExtenders::Mcp23017::IoPin::GPA1
 
 #define MOTOR1_PWM_PIN 5
-#define MOTOR1_FORWARD_PIN 2
-#define MOTOR1_REVERSE_PIN 3
+#define MOTOR1_FORWARD_PIN IoExtenders::Mcp23017::IoPin::GPA2
+#define MOTOR1_REVERSE_PIN IoExtenders::Mcp23017::IoPin::GPA3
 
-#define MOTOR2_PWM_PIN 20
-#define MOTOR2_FORWARD_PIN 4
-#define MOTOR2_REVERSE_PIN 5
+// #define MOTOR2_PWM_PIN 20
+// #define MOTOR2_FORWARD_PIN IoExtenders::Mcp23017::IoPin::GPA4
+// #define MOTOR2_REVERSE_PIN IoExtenders::Mcp23017::IoPin::GPA5
 
-#define MOTOR3_PWM_PIN 21
-#define MOTOR3_FORWARD_PIN 6
-#define MOTOR3_REVERSE_PIN 7
+// #define MOTOR3_PWM_PIN 21
+// #define MOTOR3_FORWARD_PIN IoExtenders::Mcp23017::IoPin::GPA6
+// #define MOTOR3_REVERSE_PIN IoExtenders::Mcp23017::IoPin::GPA7
 
 #define IOEXTENDER_RESET 6 
-
-
 
 #define I2C_MASTER_PORT i2c1
 #define I2C_MASTER_DATA_PIN 2
@@ -36,8 +36,6 @@
 I2cMultiplexer i2cMultiplexer(I2C_MASTER_PORT, I2C_MASTER_DATA_PIN, IO_EXTENDER_ENABLE_PIN);
 I2cMultiplexedChannel* auxiliary_i2c_channel = i2cMultiplexer.create_channel(I2C_MASTER_AUX_CLOCK_PIN);
 IoExtenders::Mcp23017 mcp23017(auxiliary_i2c_channel, 0x20);
-
-
 
 void on_pwm_wrap_isr()
 {
@@ -70,24 +68,15 @@ void on_pwm_wrap_isr()
 }
 
 void enable_ioextender()
-{ 
+{
     gpio_init(IOEXTENDER_RESET);
     gpio_set_dir(IOEXTENDER_RESET, GPIO_OUT);
     gpio_put(IOEXTENDER_RESET, 1);
-
-    mcp23017.set_pin_as_output(IoExtenders::Mcp23017::Bank::B, 1);
-    mcp23017.set_pin_as_output(IoExtenders::Mcp23017::Bank::A, 1);
-    mcp23017.set_pin_as_output(IoExtenders::Mcp23017::Bank::A, 2);
-    mcp23017.set_pin_as_output(IoExtenders::Mcp23017::Bank::A, 3);
-    mcp23017.set_pin_as_output(IoExtenders::Mcp23017::Bank::A, 4);
-}
-
-void test_extender_output()
-{
-    mcp23017.set_pin_state(IoExtenders::Mcp23017::Bank::A, 1, true);
-    mcp23017.set_pin_state(IoExtenders::Mcp23017::Bank::A, 2, true);
-    mcp23017.set_pin_state(IoExtenders::Mcp23017::Bank::A, 3, true);
-    mcp23017.set_pin_state(IoExtenders::Mcp23017::Bank::A, 4, true);
+    mcp23017.set_pin_as_output(DRIVER0_ENABLE_PIN);
+    mcp23017.set_pin_as_output(MOTOR0_FORWARD_PIN);
+    mcp23017.set_pin_as_output(MOTOR0_REVERSE_PIN);
+    mcp23017.set_pin_as_output(MOTOR1_FORWARD_PIN);
+    mcp23017.set_pin_as_output(MOTOR1_REVERSE_PIN);
 }
 
 void enable_pwm()
@@ -109,7 +98,7 @@ void enable_pwm()
 
 void enable_motor_driver(int motor_drive_number, bool enabled)
 {
-    mcp23017.set_pin_state(IoExtenders::Mcp23017::Bank::B, motor_drive_number, enabled);
+    mcp23017.set_pin_state(IoExtenders::Mcp23017::IoPin::GPB0, IoExtenders::Mcp23017::IoPinOutputState::high);
 }
 
 enum class Direction : int
@@ -130,8 +119,8 @@ enum class Motor : int
 
 void test_direction(Motor motor, Direction direction)
 {
-    int forwards;
-    int reverse;
+    IoExtenders::Mcp23017::IoPin forwards;
+    IoExtenders::Mcp23017::IoPin reverse;
     
     switch(motor)
     {
@@ -144,38 +133,31 @@ void test_direction(Motor motor, Direction direction)
             forwards = MOTOR1_FORWARD_PIN;
             reverse = MOTOR1_REVERSE_PIN;
             break;
-
-        case Motor::Motor2:
-            forwards = MOTOR2_FORWARD_PIN;
-            reverse = MOTOR2_REVERSE_PIN;
-            break;
-
-        case Motor::Motor3:
-            forwards = MOTOR3_FORWARD_PIN;
-            reverse = MOTOR3_REVERSE_PIN;
-            break;
     }
 
+
+    const IoExtenders::Mcp23017::IoPinOutputState HIGH = IoExtenders::Mcp23017::IoPinOutputState::high;
+    const IoExtenders::Mcp23017::IoPinOutputState LOW = IoExtenders::Mcp23017::IoPinOutputState::low;
     switch(direction)
     {
         case(Direction::Forwards):
-            mcp23017.set_pin_state(IoExtenders::Mcp23017::Bank::A, forwards, true);
-            mcp23017.set_pin_state(IoExtenders::Mcp23017::Bank::A, reverse, false);
+            mcp23017.set_pin_state(forwards, HIGH);
+            mcp23017.set_pin_state(reverse, LOW);
             break;
 
         case(Direction::Reverse):
-            mcp23017.set_pin_state(IoExtenders::Mcp23017::Bank::A, forwards, false);
-            mcp23017.set_pin_state(IoExtenders::Mcp23017::Bank::A, reverse, true);
+            mcp23017.set_pin_state(forwards, LOW);
+            mcp23017.set_pin_state(reverse, HIGH);
             break;
 
         case (Direction::ShortBrake):
-            mcp23017.set_pin_state(IoExtenders::Mcp23017::Bank::A, forwards, true);
-            mcp23017.set_pin_state(IoExtenders::Mcp23017::Bank::A, reverse, true);
+            mcp23017.set_pin_state(forwards, HIGH);
+            mcp23017.set_pin_state(reverse, HIGH);
             break;
 
         case (Direction::Stop):
-            mcp23017.set_pin_state(IoExtenders::Mcp23017::Bank::A, forwards, false);
-            mcp23017.set_pin_state(IoExtenders::Mcp23017::Bank::A, reverse, false);
+            mcp23017.set_pin_state(forwards, LOW);
+            mcp23017.set_pin_state(reverse, LOW);
             break;
     }
 }
@@ -210,7 +192,6 @@ int main()
     test_direction(Motor::Motor1, Direction::Stop);
 
 
-    test_extender_output();
 
 
     while(true)
