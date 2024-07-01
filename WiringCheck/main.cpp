@@ -9,6 +9,7 @@
 #include "ioExtenders/mcp23017_ControlPin.h"
 
 #define DRIVER0_ENABLE_PIN IoExtenders::Mcp23017::IoPin::GPB0
+#define DRIVER1_ENABLE_PIN IoExtenders::Mcp23017::IoPin::GPB1
 
 #define MOTOR0_PWM_PIN 4
 #define MOTOR0_FORWARD_PIN IoExtenders::Mcp23017::IoPin::GPA0
@@ -18,13 +19,13 @@
 #define MOTOR1_FORWARD_PIN IoExtenders::Mcp23017::IoPin::GPA2
 #define MOTOR1_REVERSE_PIN IoExtenders::Mcp23017::IoPin::GPA3
 
-// #define MOTOR2_PWM_PIN 20
-// #define MOTOR2_FORWARD_PIN IoExtenders::Mcp23017::IoPin::GPA4
-// #define MOTOR2_REVERSE_PIN IoExtenders::Mcp23017::IoPin::GPA5
+#define MOTOR2_PWM_PIN 20
+#define MOTOR2_FORWARD_PIN IoExtenders::Mcp23017::IoPin::GPA4
+#define MOTOR2_REVERSE_PIN IoExtenders::Mcp23017::IoPin::GPA5
 
-// #define MOTOR3_PWM_PIN 21
-// #define MOTOR3_FORWARD_PIN IoExtenders::Mcp23017::IoPin::GPA6
-// #define MOTOR3_REVERSE_PIN IoExtenders::Mcp23017::IoPin::GPA7
+#define MOTOR3_PWM_PIN 21
+#define MOTOR3_FORWARD_PIN IoExtenders::Mcp23017::IoPin::GPA6
+#define MOTOR3_REVERSE_PIN IoExtenders::Mcp23017::IoPin::GPA7
 
 #define IOEXTENDER_RESET 6 
 
@@ -65,24 +66,35 @@ void on_pwm_wrap_isr()
 
     pwm_set_gpio_level(MOTOR0_PWM_PIN, fade*fade);
     pwm_set_gpio_level(MOTOR1_PWM_PIN, fade*fade);
-}
+    pwm_set_gpio_level(MOTOR2_PWM_PIN, fade*fade);
+    pwm_set_gpio_level(MOTOR3_PWM_PIN, fade*fade);
+};
 
 void enable_ioextender()
 {
     gpio_init(IOEXTENDER_RESET);
     gpio_set_dir(IOEXTENDER_RESET, GPIO_OUT);
     gpio_put(IOEXTENDER_RESET, 1);
+
     mcp23017.set_pin_as_output(DRIVER0_ENABLE_PIN);
     mcp23017.set_pin_as_output(MOTOR0_FORWARD_PIN);
     mcp23017.set_pin_as_output(MOTOR0_REVERSE_PIN);
     mcp23017.set_pin_as_output(MOTOR1_FORWARD_PIN);
     mcp23017.set_pin_as_output(MOTOR1_REVERSE_PIN);
-}
+
+    mcp23017.set_pin_as_output(DRIVER1_ENABLE_PIN);
+    mcp23017.set_pin_as_output(MOTOR2_FORWARD_PIN);
+    mcp23017.set_pin_as_output(MOTOR2_REVERSE_PIN);
+    mcp23017.set_pin_as_output(MOTOR3_FORWARD_PIN);
+    mcp23017.set_pin_as_output(MOTOR3_REVERSE_PIN);
+};
 
 void enable_pwm()
 {
     gpio_set_function(MOTOR0_PWM_PIN, GPIO_FUNC_PWM);
     gpio_set_function(MOTOR1_PWM_PIN, GPIO_FUNC_PWM);
+    gpio_set_function(MOTOR2_PWM_PIN, GPIO_FUNC_PWM);
+    gpio_set_function(MOTOR3_PWM_PIN, GPIO_FUNC_PWM);
     uint slice_num = pwm_gpio_to_slice_num(MOTOR0_PWM_PIN);
 
     pwm_clear_irq(slice_num);
@@ -93,13 +105,7 @@ void enable_pwm()
     pwm_config config = pwm_get_default_config();
     pwm_config_set_clkdiv(&config, 4.f);
     pwm_init(slice_num, &config, true);
-}
-
-
-void enable_motor_driver(int motor_drive_number, bool enabled)
-{
-    mcp23017.set_pin_state(IoExtenders::Mcp23017::IoPin::GPB0, IoExtenders::Mcp23017::IoPinOutputState::high);
-}
+};
 
 enum class Direction : int
 {
@@ -117,6 +123,30 @@ enum class Motor : int
     Motor3 = 3
 };
 
+enum class Driver : int
+{
+    Driver0 = 0,
+    Driver1 = 1
+};
+
+void enable_motor_driver(Driver motor_driver, bool enabled)
+{
+    IoExtenders::Mcp23017::IoPin pin;
+    switch(motor_driver)
+    {
+        case(Driver::Driver0):
+            pin = DRIVER0_ENABLE_PIN;
+            break;
+        case(Driver::Driver1):
+            pin = DRIVER1_ENABLE_PIN;
+            break;
+    }
+
+    IoExtenders::Mcp23017::IoPinOutputState outputState = enabled ? IoExtenders::Mcp23017::IoPinOutputState::high : IoExtenders::Mcp23017::IoPinOutputState::low;
+
+    mcp23017.set_pin_state(pin, outputState);
+};
+
 void test_direction(Motor motor, Direction direction)
 {
     IoExtenders::Mcp23017::IoPin forwards;
@@ -132,6 +162,16 @@ void test_direction(Motor motor, Direction direction)
         case Motor::Motor1:
             forwards = MOTOR1_FORWARD_PIN;
             reverse = MOTOR1_REVERSE_PIN;
+            break;
+
+        case Motor::Motor2:
+            forwards = MOTOR2_FORWARD_PIN;
+            reverse = MOTOR2_REVERSE_PIN;
+            break;
+
+        case Motor::Motor3:
+            forwards = MOTOR3_FORWARD_PIN;
+            reverse = MOTOR3_REVERSE_PIN;
             break;
     }
 
@@ -160,7 +200,7 @@ void test_direction(Motor motor, Direction direction)
             mcp23017.set_pin_state(reverse, LOW);
             break;
     }
-}
+};
 
 int main()
 {
@@ -170,8 +210,8 @@ int main()
     enable_pwm();
 
 
-    enable_motor_driver(1, true);
-    sleep_ms(500);
+    enable_motor_driver(Driver::Driver0, true);
+    sleep_ms(1000);
 
     test_direction(Motor::Motor0, Direction::Forwards);
     sleep_ms(1000);
@@ -183,6 +223,10 @@ int main()
 
     sleep_ms(2000);
 
+
+    enable_motor_driver(Driver::Driver1, true);
+    sleep_ms(1000);
+
     test_direction(Motor::Motor1, Direction::Forwards);
     sleep_ms(1000);
     test_direction(Motor::Motor1, Direction::Reverse);
@@ -191,11 +235,29 @@ int main()
     sleep_ms(1000);
     test_direction(Motor::Motor1, Direction::Stop);
 
+    sleep_ms(2000);
 
+    test_direction(Motor::Motor2, Direction::Forwards);
+    sleep_ms(1000);
+    test_direction(Motor::Motor2, Direction::Reverse);
+    sleep_ms(1000);
+    test_direction(Motor::Motor2, Direction::ShortBrake);
+    sleep_ms(1000);
+    test_direction(Motor::Motor2, Direction::Stop);
+
+    sleep_ms(2000);
+
+    test_direction(Motor::Motor3, Direction::Forwards);
+    sleep_ms(1000);
+    test_direction(Motor::Motor3, Direction::Reverse);
+    sleep_ms(1000);
+    test_direction(Motor::Motor3, Direction::ShortBrake);
+    sleep_ms(1000);
+    test_direction(Motor::Motor3, Direction::Stop);
 
 
     while(true)
     {
         tight_loop_contents();
     }
-}
+};
