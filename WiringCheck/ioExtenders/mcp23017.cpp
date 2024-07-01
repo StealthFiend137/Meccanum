@@ -49,32 +49,8 @@ void IoExtenders::Mcp23017::set_pin_state(Bank bank, int pinNumber, bool highLow
 
 void IoExtenders::Mcp23017::get_bank_and_number(const IoPin pin, Bank& bank, int& pinNumber)
 {
-    switch(pin)
-    {
-        case IoPin::GPA0:
-        case IoPin::GPA1:
-        case IoPin::GPA2:
-        case IoPin::GPA3:
-        case IoPin::GPA4:
-        case IoPin::GPA5:
-        case IoPin::GPA6:
-        case IoPin::GPA7:
-            bank = Bank::A;
-            pinNumber = (int)pin-21;
-            break;
-        
-        case IoPin::GPB0:
-        case IoPin::GPB1:
-        case IoPin::GPB2:
-        case IoPin::GPB3:
-        case IoPin::GPB4:
-        case IoPin::GPB5:
-        case IoPin::GPB6:
-        case IoPin::GPB7:
-            bank = Bank::B;
-            pinNumber = (int)pin-1;
-            break;
-    }
+    bank = (int)pin > 10 ? Bank::A : Bank::B;
+    pinNumber = ((int)pin % 20) - 1;
 }
 
 void IoExtenders::Mcp23017::set_pin_as_output(const IoPin pin)
