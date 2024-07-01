@@ -129,6 +129,19 @@ enum class Driver : int
     Driver1 = 1
 };
 
+void flash_pin(IoExtenders::Mcp23017::IoPin pin, IoExtenders::Mcp23017::IoPinOutputState end_state)
+{
+    IoExtenders::Mcp23017::IoPinOutputState initialState = end_state == IoExtenders::Mcp23017::IoPinOutputState::low ? IoExtenders::Mcp23017::IoPinOutputState::high : IoExtenders::Mcp23017::IoPinOutputState::low;
+
+    for(int i = 0; i<4; i++)
+    {
+        mcp23017.set_pin_state(pin, initialState);
+        sleep_ms(100);
+        mcp23017.set_pin_state(pin, end_state);
+        sleep_ms(100);
+    }
+}
+
 void enable_motor_driver(Driver motor_driver, bool enabled)
 {
     IoExtenders::Mcp23017::IoPin pin;
@@ -143,8 +156,7 @@ void enable_motor_driver(Driver motor_driver, bool enabled)
     }
 
     IoExtenders::Mcp23017::IoPinOutputState outputState = enabled ? IoExtenders::Mcp23017::IoPinOutputState::high : IoExtenders::Mcp23017::IoPinOutputState::low;
-
-    mcp23017.set_pin_state(pin, outputState);
+    flash_pin(pin, outputState);
 };
 
 void test_direction(Motor motor, Direction direction)
@@ -202,13 +214,9 @@ void test_direction(Motor motor, Direction direction)
     }
 };
 
-int main()
+
+void run_tests()
 {
-    stdio_init_all();
-
-    enable_ioextender();
-    enable_pwm();
-
 
     enable_motor_driver(Driver::Driver0, true);
     sleep_ms(1000);
@@ -223,10 +231,6 @@ int main()
 
     sleep_ms(2000);
 
-
-    enable_motor_driver(Driver::Driver1, true);
-    sleep_ms(1000);
-
     test_direction(Motor::Motor1, Direction::Forwards);
     sleep_ms(1000);
     test_direction(Motor::Motor1, Direction::Reverse);
@@ -236,6 +240,12 @@ int main()
     test_direction(Motor::Motor1, Direction::Stop);
 
     sleep_ms(2000);
+
+
+
+
+    enable_motor_driver(Driver::Driver1, true);
+    sleep_ms(1000);
 
     test_direction(Motor::Motor2, Direction::Forwards);
     sleep_ms(1000);
@@ -255,9 +265,17 @@ int main()
     sleep_ms(1000);
     test_direction(Motor::Motor3, Direction::Stop);
 
+}
+
+int main()
+{
+    stdio_init_all();
+
+    enable_ioextender();
+    enable_pwm();
 
     while(true)
     {
-        tight_loop_contents();
+        run_tests();
     }
 };
