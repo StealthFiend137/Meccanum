@@ -42,8 +42,8 @@ def set_speed(num):
     bus.write_i2c_block_data(chassis_address, WDIR, xUpdate)
     time.sleep(0.2)
 
-while True:
-    set_speed(100);
+#while True:
+set_speed(100);
 
 
 #set_speed(75);

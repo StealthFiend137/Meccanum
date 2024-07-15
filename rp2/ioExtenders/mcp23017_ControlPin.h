@@ -2,12 +2,12 @@
 #include "../control/controlPin.h"
 #include "mcp23017.h"
 
-namespace ControlPins
+namespace IoExtenders
 {
     class Mcp23017_ControlPin;
 };
 
-class ControlPins::Mcp23017_ControlPin : public virtual ControlPins::DigitalControlPin
+class IoExtenders::Mcp23017_ControlPin : public virtual ControlPins::DigitalControlPin
 {
 private:
 

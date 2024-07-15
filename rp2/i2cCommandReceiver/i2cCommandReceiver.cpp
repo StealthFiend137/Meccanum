@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include <hardware/gpio.h>
 #include <pico/time.h>
 
@@ -20,6 +22,8 @@ I2cCommandReceiver::I2cCommandReceiver(i2c_inst_t* i2c, Chassis* chassis)
 /// @param event The details of the message/event that triggered this event.
 void I2cCommandReceiver::i2c_slave_isr(i2c_inst_t *i2c, i2c_slave_event_t event)
 {
+    printf("entered i2c isr.\n");
+
     switch (event)
     {
         case I2C_SLAVE_RECEIVE: // master has sent a byte.

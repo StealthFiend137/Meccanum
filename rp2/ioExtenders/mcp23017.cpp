@@ -1,4 +1,5 @@
 #include "mcp23017.h"
+#include "mcp23017_ControlPin.h"
 
 /// @brief Provides control of the output pins of an MCP23017.
 /// @param i2c_instance The already connected i2c instance.
@@ -18,7 +19,7 @@ void IoExtenders::Mcp23017::set_pin_as_output(Bank bank, int pinNumber)
     this->_i2c_multiplexed_channel->i2c_read_blocking(_i2c_address, read_buffer, 1, FINISHED_WITH_BUS);
 
     uint8_t current = read_buffer[0];
-    uint8_t pinMask = 1 << (pinNumber-1);
+    uint8_t pinMask = 1 << (pinNumber);
     uint8_t write_buffer[2] { address };
     write_buffer[1] = (current & static_cast<uint8_t>(~pinMask));
     this->_i2c_multiplexed_channel->i2c_write_blocking(_i2c_address, write_buffer, 2, FINISHED_WITH_BUS);
@@ -34,7 +35,7 @@ void IoExtenders::Mcp23017::set_pin_state(Bank bank, int pinNumber, bool highLow
     this->_i2c_multiplexed_channel->i2c_read_blocking(_i2c_address, read_buffer, 1, FINISHED_WITH_BUS);
 
     uint8_t write_buffer[2] { address };
-    uint8_t pinMask = 1 << (pinNumber-1);
+    uint8_t pinMask = 1 << (pinNumber);
     if (highLow)
     {
         write_buffer[1] = (read_buffer[0] | pinMask);
@@ -46,3 +47,34 @@ void IoExtenders::Mcp23017::set_pin_state(Bank bank, int pinNumber, bool highLow
 
     this->_i2c_multiplexed_channel->i2c_write_blocking(_i2c_address, write_buffer, 2, FINISHED_WITH_BUS);
 };
+
+void IoExtenders::Mcp23017::get_bank_and_number(const IoPin pin, Bank& bank, int& pinNumber)
+{
+    bank = (int)pin > 10 ? Bank::A : Bank::B;
+    pinNumber = ((int)pin % 20) - 1;
+}
+
+void IoExtenders::Mcp23017::set_pin_as_output(const IoPin pin)
+{
+    Bank bank;
+    int pinNumber;
+    this->get_bank_and_number(pin, bank, pinNumber);    
+    this->set_pin_as_output(bank, pinNumber);
+    this->set_pin_state(bank, pinNumber, false);
+}
+
+void IoExtenders::Mcp23017::set_pin_state(const IoPin pin, const IoPinOutputState state)
+{
+    Bank bank;
+    int pinNumber;
+    this->get_bank_and_number(pin, bank, pinNumber);
+    this->set_pin_state(bank, pinNumber, (bool)state);
+}
+
+ControlPins::DigitalControlPin* IoExtenders::Mcp23017::get_DigitalControlPin(IoPin pin)
+{
+    Bank bank;
+    int pinNumber;
+    this->get_bank_and_number(pin, bank, pinNumber);
+    return new IoExtenders::Mcp23017_ControlPin(this, bank, pinNumber);
+}
