@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <algorithm>
+#include <cstdio>
 
 /// @brief Initializes a new intance of the Meccanum class.
 /// @param chassis 
@@ -80,13 +81,15 @@ void Meccanum::action_movement()
 
 void Meccanum::calculateWheelVelocities(const int w, const int x, const int y, int &frontLeft, int &frontRight, int &rearLeft,int &rearRight)
 {
+    printf("w: %d, x: %d, y: %d\n", w, x, y);
+
     double lx = 0.5;
     double wx = 0.5;
 
-    double v_fl = y + x - w * (lx+wx);
-    double v_fr = y - x - w * (lx+wx);
-    double v_rl = y - x + w * (lx+wx);
-    double v_rr = y + x + w * (lx+wx);
+    double v_fl = w + x - y * (lx+wx);
+    double v_fr = w - x - y * (lx+wx);
+    double v_rl = w - x + y * (lx+wx);
+    double v_rr = w + x + y * (lx+wx);
 
     double max = std::max(std::abs(v_fl), std::abs(v_fr));
     max = std::max(max, std::abs(v_rl));

@@ -44,9 +44,9 @@ void Chassis::decay()
 };
 
 /// @brief Sets all of the movement axes simultaneously.
+/// @param wVelocity The value of the w axis.
 /// @param xVelocity The value of the x axis.
 /// @param yVelocity The value of the y axis.
-/// @param wVelocity The value of the w axis.
 void Chassis::set_all_axes(int wVelocity, int xVelocity, int yVelocity)
 {
     int modified_time = to_ms_since_boot(get_absolute_time());

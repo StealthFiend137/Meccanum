@@ -1,5 +1,6 @@
 #include <algorithm>
 #include "i2cBuffer.h"
+#include <cstdio>
 
 I2cBuffer::I2cBuffer()
 {
@@ -23,6 +24,7 @@ void I2cBuffer::end_message()
 
 void I2cBuffer::add_data(uint8_t data)
 {
+    printf("adding: %u\n", data);
     uint8_t addressBeingWritten = this->_start_address + this->_bytes_written;
 
     int writingIndex = this->_bytes_written;

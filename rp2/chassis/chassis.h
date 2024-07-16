@@ -14,10 +14,10 @@ public:
     Chassis(const uint command_timeout_ms);
 
     /// @brief Sets all of the movement axes simultaneously.
+    /// @param wVelocity The value of the w axis.
     /// @param xVelocity The value of the x axis.
     /// @param yVelocity The value of the y axis.
-    /// @param wVelocity The value of the w axis.
-    void set_all_axes(int xVelocity, int yVelocity, int wVelocity);
+    void set_all_axes(int wVelocity, int xVelocity, int yVelocity);
 
     /// @brief Sets the speed of the axis.
     /// @param speed The requested speed of the axis.

@@ -1,5 +1,3 @@
-#include <stdio.h>
-
 #include <hardware/gpio.h>
 #include <pico/time.h>
 
@@ -22,8 +20,6 @@ I2cCommandReceiver::I2cCommandReceiver(i2c_inst_t* i2c, Chassis* chassis)
 /// @param event The details of the message/event that triggered this event.
 void I2cCommandReceiver::i2c_slave_isr(i2c_inst_t *i2c, i2c_slave_event_t event)
 {
-    printf("entered i2c isr.\n");
-
     switch (event)
     {
         case I2C_SLAVE_RECEIVE: // master has sent a byte.
@@ -76,7 +72,6 @@ void I2cCommandReceiver::command_receiver_init(uint sda_pin, uint scl_pin, uint 
     
     i2c_init(_i2c_instance, baudrate);
     i2c_slave_init(_i2c_instance, slave_address, i2c_slave_isr);
-
 };
 
 bool I2cCommandReceiver::get_if_register_modified(I2cBuffer::ModifiedRegisters effectedRegister)
