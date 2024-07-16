@@ -21,6 +21,7 @@
 #include <time.h>
 
 #define HIGH ControlPins::DigitalControlPin::PinState::High
+#define LOW ControlPins::DigitalControlPin::PinState::Low
 
 
 #define DRIVER0_ENABLE_PIN IoExtenders::Mcp23017::IoPin::GPB0
@@ -43,10 +44,7 @@
 #define MOTOR3_REVERSE_PIN IoExtenders::Mcp23017::IoPin::GPA7
 
 #define IOEXTENDER_RESET 6 
-
 #define LED_STATUS_INDICATOR PICO_DEFAULT_LED_PIN
-
-int movementIntervalStartTime = to_ms_since_boot(get_absolute_time());
 
 // Master I2C (for communication with onboard IO extender and multiplexed absolute rotation sensors.)
 // ============================================================================
@@ -64,38 +62,38 @@ static const uint I2C_SLAVE_BAUDRATE = 100000; // 100 kHz
 
 // Will need to fine-tune this value to see what works best from the i2c host.
 //TODO: just to make things even more fun, consider making this timeout configurable.
-uint chassis_timeout_ms = 200;  
+uint chassis_timeout_ms = 500;  
 Chassis chassis(chassis_timeout_ms);
 
 // Io extender multiplexer position.
 // ============================================================================
 I2cMultiplexer i2cMultiplexer(I2C_MASTER_PORT, I2C_MASTER_DATA_PIN, IOEXTENDER_RESET);
 I2cMultiplexedChannel* auxiliary_i2c_channel = i2cMultiplexer.create_channel(I2C_MASTER_AUX_CLOCK_PIN);
-IoExtenders::Mcp23017 mcp23017(auxiliary_i2c_channel, 0x20);
+IoExtenders::Mcp23017 mcp23017(auxiliary_i2c_channel, 0x20, IOEXTENDER_RESET);
 
 // Motor direction control pins
 // ============================================================================
-// ControlPins::DigitalControlPin* motor_0_cw = mcp23017.get_DigitalControlPin(MOTOR0_FORWARD_PIN);
-// ControlPins::DigitalControlPin* motor_0_ccw = mcp23017.get_DigitalControlPin(MOTOR0_REVERSE_PIN);
-// ControlPins::DigitalControlPin* motor_1_cw = mcp23017.get_DigitalControlPin(MOTOR1_FORWARD_PIN);
-// ControlPins::DigitalControlPin* motor_1_ccw = mcp23017.get_DigitalControlPin(MOTOR1_REVERSE_PIN);
-// ControlPins::DigitalControlPin* motor_2_cw = mcp23017.get_DigitalControlPin(MOTOR2_FORWARD_PIN);
-// ControlPins::DigitalControlPin* motor_2_ccw = mcp23017.get_DigitalControlPin(MOTOR2_REVERSE_PIN);
-// ControlPins::DigitalControlPin* motor_3_cw = mcp23017.get_DigitalControlPin(MOTOR3_FORWARD_PIN);
-// ControlPins::DigitalControlPin* motor_3_ccw = mcp23017.get_DigitalControlPin(MOTOR3_REVERSE_PIN);
+ControlPins::DigitalControlPin* motor_0_cw = mcp23017.get_DigitalOutputControlPin(MOTOR0_FORWARD_PIN, LOW);
+ControlPins::DigitalControlPin* motor_0_ccw = mcp23017.get_DigitalOutputControlPin(MOTOR0_REVERSE_PIN, LOW);
+ControlPins::DigitalControlPin* motor_1_cw = mcp23017.get_DigitalOutputControlPin(MOTOR1_FORWARD_PIN, LOW);
+ControlPins::DigitalControlPin* motor_1_ccw = mcp23017.get_DigitalOutputControlPin(MOTOR1_REVERSE_PIN, LOW);
+ControlPins::DigitalControlPin* motor_2_cw = mcp23017.get_DigitalOutputControlPin(MOTOR2_FORWARD_PIN, LOW);
+ControlPins::DigitalControlPin* motor_2_ccw = mcp23017.get_DigitalOutputControlPin(MOTOR2_REVERSE_PIN, LOW);
+ControlPins::DigitalControlPin* motor_3_cw = mcp23017.get_DigitalOutputControlPin(MOTOR3_FORWARD_PIN, LOW);
+ControlPins::DigitalControlPin* motor_3_ccw = mcp23017.get_DigitalOutputControlPin(MOTOR3_REVERSE_PIN, LOW);
 
 // // Motor driver control pins
 // // ============================================================================
-ControlPins::DigitalControlPin* motor_driver_0_enable = mcp23017.get_DigitalControlPin(DRIVER0_ENABLE_PIN);
-ControlPins::DigitalControlPin* motor_driver_1_enable = mcp23017.get_DigitalControlPin(DRIVER1_ENABLE_PIN);
+ControlPins::DigitalControlPin* motor_driver_0_enable = mcp23017.get_DigitalOutputControlPin(DRIVER0_ENABLE_PIN, HIGH);
+ControlPins::DigitalControlPin* motor_driver_1_enable = mcp23017.get_DigitalOutputControlPin(DRIVER1_ENABLE_PIN, HIGH);
 
 // // Open loop motor controllers
 // // ============================================================================
-// Motors::Motor* frontLeft = new Motors::OpenLoop(MOTOR0_PWM_PIN, motor_0_cw, motor_0_ccw);
-// Motors::Motor* frontRight = new Motors::OpenLoop(MOTOR1_PWM_PIN, motor_1_cw, motor_1_ccw);
-// Motors::Motor* rearLeft = new Motors::OpenLoop(MOTOR2_PWM_PIN, motor_2_cw, motor_2_ccw);
-// Motors::Motor* rearRight = new Motors::OpenLoop(MOTOR3_PWM_PIN, motor_3_cw, motor_3_ccw);
-// Meccanum drivetrain(&chassis, frontLeft, frontRight, rearLeft, rearRight);
+Motors::Motor* frontLeft = new Motors::OpenLoop(MOTOR0_PWM_PIN, motor_0_cw, motor_0_ccw);
+Motors::Motor* frontRight = new Motors::OpenLoop(MOTOR1_PWM_PIN, motor_1_cw, motor_1_ccw);
+Motors::Motor* rearLeft = new Motors::OpenLoop(MOTOR2_PWM_PIN, motor_2_cw, motor_2_ccw);
+Motors::Motor* rearRight = new Motors::OpenLoop(MOTOR3_PWM_PIN, motor_3_cw, motor_3_ccw);
+Meccanum drivetrain(&chassis, frontLeft, frontRight, rearLeft, rearRight);
 
 // Slave i2c (for receiving communcation and instructions)
 // ============================================================================
@@ -116,51 +114,21 @@ void indicate_status(int ms_since_boot)
     gpio_put(LED_STATUS_INDICATOR, ledOn);
 };
 
+int movementIntervalStartTime = to_ms_since_boot(get_absolute_time());
 void action_movement(int ms_since_boot)
 {
     int elapsed_time = ms_since_boot - movementIntervalStartTime; 
     if(elapsed_time < 50) return;
     movementIntervalStartTime = ms_since_boot;
-    //drivetrain.action_updates();
+    drivetrain.action_updates();
 };
 
-void configure_ioextender()
-{ 
-    gpio_init(IOEXTENDER_RESET);
-    gpio_set_dir(IOEXTENDER_RESET, GPIO_OUT);
-    gpio_put(IOEXTENDER_RESET, 1);
-
-    mcp23017.set_pin_as_output(DRIVER0_ENABLE_PIN);
-    mcp23017.set_pin_as_output(MOTOR0_FORWARD_PIN);
-    mcp23017.set_pin_as_output(MOTOR0_REVERSE_PIN);
-    mcp23017.set_pin_as_output(MOTOR1_FORWARD_PIN);
-    mcp23017.set_pin_as_output(MOTOR1_REVERSE_PIN);
-
-    mcp23017.set_pin_as_output(DRIVER1_ENABLE_PIN);
-    mcp23017.set_pin_as_output(MOTOR2_FORWARD_PIN);
-    mcp23017.set_pin_as_output(MOTOR2_REVERSE_PIN);
-    mcp23017.set_pin_as_output(MOTOR3_FORWARD_PIN);
-    mcp23017.set_pin_as_output(MOTOR3_REVERSE_PIN);
-}
-
-void enable_motor_drivers() {
-    motor_driver_0_enable->set_pin_state(HIGH);
-    motor_driver_1_enable->set_pin_state(HIGH);
-
-
-    }
-
-int main() {
+int main()
+{
     stdio_init_all();
     status_indicator_init();
 
-    configure_ioextender();
-    enable_motor_drivers();
-
     i2cCommandReceiver.command_receiver_init(I2C_SLAVE_SDA_PIN, I2C_SLAVE_SCL_PIN, I2C_SLAVE_BAUDRATE, I2C_SLAVE_ADDRESS);
-
-    
-    
 
     // uart_init(uart0, 115200);
     // gpio_set_function(0, GPIO_FUNC_UART);

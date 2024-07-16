@@ -49,6 +49,7 @@ private:
 
     int _i2c_address;
     I2cMultiplexedChannel* _i2c_multiplexed_channel;
+    int _enable_pin;
 
     void get_bank_and_number(const IoPin pin, Bank& bank, int& pinNumber);
 
@@ -81,18 +82,20 @@ public:
         GPB7 = 8
     };
 
-    enum class IoPinOutputState : bool
-    {
-        low = false,
-        high = true
-    };
+    // enum class IoPinOutputState : bool
+    // {
+    //     low = false,
+    //     high = true
+    // };
 
-    Mcp23017(I2cMultiplexedChannel* i2c_multiplexed_channel, int i2c_address);
-    ControlPins::DigitalControlPin* get_DigitalControlPin(IoPin pin);
+    Mcp23017(I2cMultiplexedChannel* i2c_multiplexed_channel, int i2c_address, int enable_pin);
+    ControlPins::DigitalControlPin* get_DigitalControlPin(const IoPin pin);
+    ControlPins::DigitalControlPin* get_DigitalOutputControlPin(const IoPin pin, const ControlPins::DigitalControlPin::PinState initialState);
+    void reset();
 
     void set_pin_as_output(Bank bank, int pinNumber);
     void set_pin_as_output(IoPin pin);
 
     void set_pin_state(Bank bank, int pinNumber, bool highLow);
-    void set_pin_state(const IoPin pin, const IoPinOutputState state);
+    void set_pin_state(const IoPin pin, const ControlPins::DigitalControlPin::PinState  state);
 };

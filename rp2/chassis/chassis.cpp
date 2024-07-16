@@ -19,12 +19,9 @@ Chassis::Chassis(const uint command_timeout_ms) :
     xAxis(0, command_timeout_ms),
     yAxis(0, command_timeout_ms)
 {
-    //TODO: actually implement this timeout.
     this->_command_timeout_ms = command_timeout_ms;
     Chassis::instance = this;
-
-    const int interval_ms = 100;
-    add_repeating_timer_ms(interval_ms, decay_callback, NULL, &decay_timer);
+    add_repeating_timer_ms(command_timeout_ms, decay_callback, NULL, &decay_timer);
 };
 
 bool Chassis::decay_callback(struct repeating_timer *t)
