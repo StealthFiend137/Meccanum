@@ -21,6 +21,7 @@ class Command:
         
     def get_axes(self) -> Dict[Axis, int]:
         sorted_dict = dict(sorted(self.axes.items(), key=lambda item:item[0].value))
+        self.axes.clear()
         return sorted_dict
         
     class _Guard:
@@ -38,7 +39,8 @@ class Command:
         def check_value_range(value):
             if value < -100 or value > 100:
                 raise ValueError('The value parameter represents percentage and must be in the range -100 to 100')
-            
+
+
 class Serializer:
     
     def __init__(self):
@@ -57,9 +59,36 @@ class Serializer:
         
         return bytes(byte_array)
     
-    def deserialize(self, serialized:str) -> Command:
-        pass
-    
+    @staticmethod
+    def is_bit_set(byte, axis):
+        bitmask = 1 << axis.value-1
+        result = byte & bitmask
+        return result != 0
+
+    @staticmethod
+    def deserialize(payload) -> Command:
+        command = Command()
+                
+        indicator_byte = payload[0]
+        byte_position = 0
+        
+        if Serializer.is_bit_set(indicator_byte, Axis.w):
+            byte_position += 1
+            val = struct.unpack('b', bytes([payload[byte_position]]))[0]
+            command.add_axis(Axis.w, val)
+            
+        if Serializer.is_bit_set(indicator_byte, Axis.x):
+            byte_position += 1
+            val = struct.unpack('b', bytes([payload[byte_position]]))[0]
+            command.add_axis(Axis.x, val)
+            
+        if Serializer.is_bit_set(indicator_byte, Axis.y):
+            byte_position += 1
+            val = struct.unpack('b', bytes([payload[byte_position]]))[0]
+            command.add_axis(Axis.y, val)
+
+        return command   
+
     class _Guard:
         pass
 
