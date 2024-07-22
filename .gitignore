@@ -3,3 +3,6 @@
 cmake-*
 .DS_Store
 build
+lib
+lib64
+bin
