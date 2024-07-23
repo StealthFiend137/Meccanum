@@ -21,10 +21,18 @@ class Cache:
         self.y = value
 
 class Chassis:
+    
+    CHASSIS_ADDRESS = 0x17;
+    
+    WDIR = 0x00
+    XDIR = 0x01
+    YDIR = 0X02
+
     def __init__(self):
+        #self._bus = SMBus(1)
         self._running = False
         self._cache = Cache()
-
+        
     def update(self, command):
         axes = command.get_axes()
         for axis, value in axes.items():
@@ -46,9 +54,15 @@ class Chassis:
         
     def _loop(self):
          while self._running:
-             time.sleep(0.05)
-             print(f'{self._cache.w} {self._cache.x} {self._cache.y}')
+             time.sleep(0.1)
+             self._update_chassis(self._cache)
              
+             
+    def _update_chassis(self, cache):
+        update = [cache.w, cache.x, cache.y]
+        #self._bus.write_i2c_block_data(self.CHASSIS_ADDRESS, WDIR, update)
+        print(f'{self.CHASSIS_ADDRESS}, {update}')
+        
 
 def on_connect(client, userdata, flags, result_code, properties):
     print(f'Connected with result code {result_code}')
