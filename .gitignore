@@ -6,3 +6,5 @@ build
 lib
 lib64
 bin
+KiCad/*-backups
+KiCad/*-bak
